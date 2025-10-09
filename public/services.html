@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suave Barbershop</title>
+  <link rel="stylesheet" href="services.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Montserrat:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <img src="suavelogo.png" alt="Loading Logo">
+</div>
+
+<!-- Navbar -->
+<nav>
+  <a href="/home" class="nav-link"><img src="suavelogo.png" alt="Suave Logo"></a>
+  <h1 class="brand-name">Suave Barbershop</h1>
+  <ul>
+    <li><a href="/home" class="nav-link">HOME</a></li>
+    <li><a href="/about" class="nav-link">ABOUT US</a></li>
+    <li><a href="/mybookings" class="nav-link">MY BOOKINGS</a></li>
+  </ul>
+  <div class="profile-dropdown">
+    <div class="profile" id="profileBtn">
+      <img id="navbar-profile-pic" src="default-profile.svg" alt="Profile">
+    </div>
+    <div class="dropdown-menu" id="dropdownMenu">
+      <a href="/profile">Profile</a>
+      <a href="/forgot">Change Password</a>
+      <a href="javascript:void(0)" id="logoutBtn">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Title -->
+<h2> SELECT SERVICES </h2>
+
+<!-- Services -->
+<div class="payment-container">
+  <div class="payment-box service-link">
+    <i class="fa-solid fa-scissors"></i>
+    <p>HAIRCUT</p>
+    <div class="service-price">₱250</div>
+  </div>
+
+  <div class="payment-box service-link">
+    <i class="fa-solid fa-scissors"></i>
+    <p>CUT AND SHAVE</p>
+    <div class="service-price">₱300</div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  &copy; 2025 Suave Barbershop | All Rights Reserved
+</footer>
+
+<script src="profile-manager.js"></script>
+<script>
+  let selectedService = null;
+
+  // Remove loading screen after page load
+  window.addEventListener("load", () => {
+    const loadingScreen = document.getElementById("loading-screen");
+    setTimeout(() => {
+      loadingScreen.style.display = "none";
+    }, 1000);
+  });
+
+  // Handle service selection with automatic navigation
+  const serviceBoxes = document.querySelectorAll(".payment-box");
+  serviceBoxes.forEach(box => {
+    box.addEventListener("click", async function () {
+      // Show visual selection feedback
+      serviceBoxes.forEach(b => b.classList.remove("selected"));
+      this.classList.add("selected");
+      selectedService = this.querySelector("p").innerText;
+
+      // Show loading screen immediately
+      const loadingScreen = document.getElementById("loading-screen");
+      loadingScreen.style.display = "flex";
+
+      try {
+        // Send selected service to backend session
+        await fetch("/api/select-service", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ service: selectedService })
+        });
+
+        // Store service in sessionStorage
+        sessionStorage.setItem("service", selectedService);
+
+        // Add a small delay to show the selection feedback, then navigate
+        setTimeout(() => {
+          window.location.href = "/barber";
+        }, 800); // Reduced delay for better UX
+
+      } catch (err) {
+        console.error("Error saving service:", err);
+        // Hide loading screen on error
+        loadingScreen.style.display = "none";
+        alert("❌ Failed to save service. Please try again.");
+        // Remove selection on error
+        this.classList.remove("selected");
+      }
+    });
+  });
+
+  // Navbar loading animation
+  document.querySelectorAll(".nav-link").forEach(link => {
+    link.addEventListener("click", function (event) {
+      event.preventDefault();
+      const loadingScreen = document.getElementById("loading-screen");
+      loadingScreen.style.display = "flex";
+      setTimeout(() => {
+        window.location.href = this.href;
+      }, 1500);
+    });
+  });
+
+  // Profile Dropdown
+  const profileBtn = document.getElementById("profileBtn");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+  profileBtn.addEventListener("click", () => {
+    dropdownMenu.classList.toggle("show");
+  });
+  window.addEventListener("click", (e) => {
+    if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+      dropdownMenu.classList.remove("show");
+    }
+  });
+
+  // Logout is handled by logout-confirm.js (confirmation modal)
+
+  // Load profile picture from localStorage (or fetch from backend if available)
+  window.addEventListener("DOMContentLoaded", () => {
+    // Initialize ProfileManager for real-time profile picture updates
+    const profileManager = new ProfileManager();
+    profileManager.init();
+  });
+</script>
+<script src="logout-confirm.js"></script>
+</body>
+</html>

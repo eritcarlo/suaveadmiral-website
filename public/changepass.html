@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Change Password - Suave Barbershop</title>
+  <link rel="stylesheet" href="changepass.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Left Section -->
+    <div class="left-side">
+      <div class="logo-overlay">
+        <img src="logo.png" alt="Suave Barbershop Logo">
+      </div>
+    </div>
+
+    <!-- Right Section -->
+    <div class="right-side">
+      <div class="form-container">
+        <h2>CHANGE PASSWORD</h2>
+
+        <div class="password-wrapper">
+          <input type="password" id="current-password" placeholder="Current Password">
+          <span class="toggle-password">👁️</span>
+        </div>
+
+        <div class="password-wrapper">
+          <input type="password" id="new-password" placeholder="New Password">
+          <span class="toggle-password">👁️</span>
+        </div>
+
+        <div class="password-wrapper">
+          <input type="password" id="confirm-password" placeholder="Confirm Password">
+          <span class="toggle-password">👁️</span>
+        </div>
+
+        <div id="password-strength" class="password-strength" style="display: none;">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strength-fill"></div>
+          </div>
+          <span id="strength-text">Password strength</span>
+        </div>
+
+        <button onclick="changePassword()" class="btn reset-btn" id="change-btn">
+          <i class="fa fa-key"></i> CHANGE PASSWORD
+        </button>
+        <button onclick="goBack()" class="btn back-btn" style="background: #666; margin-top: 10px;">
+          <i class="fa fa-arrow-left"></i> BACK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Dialog (matching login page style) -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modal-message"></div>
+      <button id="modal-ok" class="modal-btn">OK</button>
+    </div>
+  </div>
+
+  <script>
+    // Modal functions (matching login page)
+    function showModal(message) {
+      document.getElementById("modal-message").textContent = message;
+      document.getElementById("modal").style.display = "block";
+    }
+
+    function hideModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    // Modal event listeners
+    document.querySelector(".close").addEventListener("click", hideModal);
+    document.getElementById("modal-ok").addEventListener("click", hideModal);
+    document.getElementById("modal").addEventListener("click", function (e) {
+      if (e.target === this) hideModal();
+    });
+
+    // Toggle password visibility (matching login page style)
+    document.querySelectorAll(".toggle-password").forEach((toggle) => {
+      toggle.addEventListener("click", () => {
+        const input = toggle.previousElementSibling;
+        if (input.type === "password") {
+          input.type = "text";
+          toggle.textContent = "🙈";
+        } else {
+          input.type = "password";
+          toggle.textContent = "👁️";
+        }
+      });
+    });
+
+    // Password strength checker
+    function checkPasswordStrength(password) {
+      let strength = 0;
+      const checks = {
+        length: password.length >= 8,
+        lowercase: /[a-z]/.test(password),
+        uppercase: /[A-Z]/.test(password),
+        numbers: /\d/.test(password),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+      };
+
+      strength = Object.values(checks).filter(Boolean).length;
+      
+      return {
+        score: strength,
+        level: strength < 2 ? 'weak' : strength < 4 ? 'medium' : 'strong'
+      };
+    }
+
+    // Update password strength indicator
+    function updatePasswordStrength() {
+      const password = document.getElementById('new-password').value;
+      const strengthDiv = document.getElementById('password-strength');
+      const strengthFill = document.getElementById('strength-fill');
+      const strengthText = document.getElementById('strength-text');
+
+      if (password.length > 0) {
+        strengthDiv.style.display = 'block';
+        const strength = checkPasswordStrength(password);
+        
+        strengthFill.className = `strength-fill ${strength.level}`;
+        strengthFill.style.width = `${(strength.score / 5) * 100}%`;
+        
+        strengthText.textContent = `Password strength: ${strength.level.toUpperCase()}`;
+      } else {
+        strengthDiv.style.display = 'none';
+      }
+    }
+
+    // Add event listener for password strength
+    document.getElementById('new-password').addEventListener('input', updatePasswordStrength);
+    
+    async function changePassword() {
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const changeBtn = document.getElementById('change-btn');
+      
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        showModal('Please fill in all fields');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        showModal('New passwords do not match');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        showModal('New password must be at least 6 characters long');
+        return;
+      }
+
+      if (currentPassword === newPassword) {
+        showModal('New password must be different from current password');
+        return;
+      }
+      
+      // Disable button and show loading
+      changeBtn.disabled = true;
+      changeBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> CHANGING...';
+      
+      try {
+        const res = await fetch('/api/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          showModal('Password changed successfully!');
+          // Clear form
+          document.getElementById('current-password').value = '';
+          document.getElementById('new-password').value = '';
+          document.getElementById('confirm-password').value = '';
+          document.getElementById('password-strength').style.display = 'none';
+        } else {
+          showModal(data.error || 'Failed to change password');
+        }
+      } catch (err) {
+        showModal('An error occurred. Please try again.');
+      } finally {
+        // Re-enable button
+        changeBtn.disabled = false;
+        changeBtn.innerHTML = '<i class="fa fa-key"></i> CHANGE PASSWORD';
+      }
+    }
+    
+    function goBack() {
+      window.history.back();
+    }
+
+    // Add Enter key support
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        changePassword();
+      }
+    });
+  </script>
+
+  <style>
+    .password-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 50px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      user-select: none;
+    }
+
+    .password-strength {
+      margin: 10px 0;
+    }
+
+    .strength-bar {
+      width: 100%;
+      height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .strength-fill.weak {
+      background: #ff4757;
+    }
+
+    .strength-fill.medium {
+      background: #ffa502;
+    }
+
+    .strength-fill.strong {
+      background: #2ed573;
+    }
+
+    #strength-text {
+      font-size: 12px;
+      margin-top: 5px;
+      display: block;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Modal styles (matching login page) */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      border-radius: 8px;
+      width: 300px;
+      max-width: 90%;
+      text-align: center;
+      position: relative;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+    }
+
+    #modal-message {
+      margin: 20px 0;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .modal-btn {
+      background-color: #cf0c02;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .modal-btn:hover {
+      background-color: #a00901;
+    }
+  </style>
+</body>
+</html>

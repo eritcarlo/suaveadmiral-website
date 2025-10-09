@@ -1,0 +1,282 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding-bottom: 120px;
+  background-color: #fff;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Loading Screen */
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#loading-screen img {
+  width: 150px;
+  height: 150px;
+  animation: zoomIn 2s ease-in-out infinite alternate;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  flex-wrap: wrap;
+  background: #2c2c2c;
+  color: white;
+}
+
+nav img {
+  height: 100px;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  font-size: 28px;
+  transition: color 0.3s;
+}
+
+nav ul li a:hover {
+  color: #cf0c02;
+}
+
+nav .profile {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 30px;
+}
+
+nav .profile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brand-name {
+  font-family: 'Great Vibes', cursive;
+  font-size: 50px;
+  font-weight: bold;
+  margin-left: 15px;
+  color: white;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+}
+
+/* Section Title */
+h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 35px;
+  margin-top: 70px;
+}
+
+/* Service Boxes */
+.payment-container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 40px 20px 80px;
+  flex-wrap: wrap;
+}
+
+.payment-box {
+  background: #e6e6e6;
+  padding: 40px;
+  border-radius: 15px;
+  width: 180px;
+  text-align: center;
+  transition: transform 0.3s, background 0.3s;
+  flex: 1 1 200px;
+  max-width: 300px;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+}
+
+.payment-box:hover {
+  transform: scale(1.05);
+  background: #cf0c02;
+  color: white;
+}
+
+.payment-box i {
+  font-size: 120px;
+  color: #333;
+  margin-bottom: 20px;
+  transition: color 0.3s;
+}
+
+.payment-box p {
+  font-weight: bold;
+  font-size: 24px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+/* Add these styles to your existing services.css file */
+
+.service-price {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #cf0c02;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.payment-box:hover .service-price {
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Selected state */
+.payment-box.selected {
+  background: #cf0c02 !important;
+  color: white !important;
+}
+
+.payment-box.selected p,
+.payment-box.selected i {
+  color: white !important;
+}
+
+/* Book Button */
+.book-btn {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 12px 40px;
+  font-weight: bold;
+  border-radius: 25px;
+  text-decoration: none;
+  margin: 0 auto 50px;
+  transition: background 0.3s;
+  max-width: 200px;
+}
+
+.book-btn:hover {
+  background: #cf0c02;
+}
+
+/* Profile Dropdown Styles */
+.profile-dropdown {
+  position: relative;
+  margin-left: 40px;
+}
+.profile {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 80px;
+  right: 0;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  min-width: 180px;
+  z-index: 100;
+  flex-direction: column;
+  padding: 10px 0;
+}
+.dropdown-menu.show {
+  display: flex;
+}
+.dropdown-menu a {
+  color: #222;
+  text-decoration: none;
+  padding: 12px 24px;
+  font-size: 18px;
+  transition: background 0.2s;
+}
+.dropdown-menu a:hover {
+  background: rgba(207, 12, 2, 0.8);
+  color: #ffffff;
+}
+
+/* Footer */
+footer {
+  background: #2c2c2c;
+  color: white;
+  text-align: center;
+  padding: 15px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    gap: 15px;
+  }
+  nav ul {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .payment-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .payment-box {
+    width: 100%;
+    max-width: 280px;
+  }
+}

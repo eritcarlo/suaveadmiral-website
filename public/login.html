@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Barbershop Login</title>
+    <link rel="stylesheet" href="/login.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="left-side"></div>
+      <div class="right-side">
+        <div class="login-box">
+          <form id="loginForm" autocomplete="on">
+            <input
+              type="email"
+              id="email"
+              placeholder="E-mail"
+              required
+              autocomplete="email"
+            />
+
+            <div class="password-wrapper">
+              <input
+                type="password"
+                id="password"
+                placeholder="Password"
+                required
+                autocomplete="current-password"
+              />
+              <span class="toggle-password">👁️</span>
+            </div>
+            
+            <!-- Remember Me and Forgot Password section -->
+            <div class="login-options">
+              <div class="remember-me">
+                <input type="checkbox" id="rememberMe" />
+                <label for="rememberMe">Remember Me</label>
+              </div>
+              <a href="/forgot" class="forgot">Forgot Password?</a>
+            </div>
+
+            <button type="submit" id="loginBtn">LOGIN</button>
+
+            <!-- Sign Up -->
+            <p class="signup-text">
+              Don't have an account? <a href="/signup">Sign Up</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Dialog -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modal-message"></div>
+        <button id="modal-ok" class="modal-btn">OK</button>
+      </div>
+    </div>
+
+    <script>
+      // Modal functions
+      function showModal(message) {
+        document.getElementById("modal-message").textContent = message;
+        document.getElementById("modal").style.display = "block";
+      }
+
+      function hideModal() {
+        document.getElementById("modal").style.display = "none";
+      }
+
+      // Modal event listeners
+      document.querySelector(".close").addEventListener("click", hideModal);
+      document.getElementById("modal-ok").addEventListener("click", hideModal);
+      document.getElementById("modal").addEventListener("click", function (e) {
+        if (e.target === this) hideModal();
+      });
+
+      // Toggle password visibility
+      document.querySelectorAll(".toggle-password").forEach((toggle) => {
+        toggle.addEventListener("click", () => {
+          const input = toggle.previousElementSibling;
+          if (input.type === "password") {
+            input.type = "text";
+            toggle.textContent = "🙈";
+          } else {
+            input.type = "password";
+            toggle.textContent = "👁️";
+          }
+        });
+      });
+
+      // Remember Me functionality
+      function saveCredentials(email, password) {
+        localStorage.setItem('rememberedEmail', email);
+        localStorage.setItem('rememberedPassword', password);
+        localStorage.setItem('rememberMe', 'true');
+      }
+
+      function loadRememberedCredentials() {
+        const isRemembered = localStorage.getItem('rememberMe') === 'true';
+        if (isRemembered) {
+          const email = localStorage.getItem('rememberedEmail');
+          const password = localStorage.getItem('rememberedPassword');
+          
+          if (email && password) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
+            document.getElementById('rememberMe').checked = true;
+          }
+        }
+      }
+
+      function clearRememberedCredentials() {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberedPassword');
+        localStorage.removeItem('rememberMe');
+      }
+
+      // Auto-fill credentials if coming from registration or remembered
+      window.addEventListener('DOMContentLoaded', () => {
+        // First, check for registration auto-fill (takes priority)
+        const registeredEmail = sessionStorage.getItem('registeredEmail');
+        const registeredPassword = sessionStorage.getItem('registeredPassword');
+        
+        if (registeredEmail && registeredPassword) {
+          document.getElementById('email').value = registeredEmail;
+          document.getElementById('password').value = registeredPassword;
+          
+          // Clear the stored credentials after auto-filling
+          sessionStorage.removeItem('registeredEmail');
+          sessionStorage.removeItem('registeredPassword');
+          
+          // Show a helpful message
+          showModal("Welcome! Your login credentials have been auto-filled for your convenience.");
+        } else {
+          // If no registration auto-fill, check for remembered credentials
+          loadRememberedCredentials();
+        }
+      });
+
+      const loginForm = document.getElementById("loginForm");
+      const loginBtn = document.getElementById("loginBtn");
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Logging in...";
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const rememberMe = document.getElementById("rememberMe").checked;
+
+        try {
+          const res = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            // Handle Remember Me functionality
+            if (rememberMe) {
+              saveCredentials(email, password);
+            } else {
+              clearRememberedCredentials();
+            }
+
+            const role =
+              data.user && data.user.role
+                ? String(data.user.role).toUpperCase()
+                : "USER";
+            showModal("Login successful! Redirecting...");
+
+            setTimeout(() => {
+              if (role === "ADMIN") {
+                window.location.href = "/admin";
+              } else if (role === "SUPERADMIN") {
+                window.location.href = "/superadmin";
+              } else {
+                window.location.href = "/home";
+              }
+            }, 1500);
+          } else {
+            showModal("Login failed: " + (data.error || "Unknown error"));
+          }
+        } catch (err) {
+          showModal("Network error: " + err.message);
+        } finally {
+          loginBtn.disabled = false;
+          loginBtn.textContent = "LOGIN";
+        }
+      });
+    </script>
+  </body>
+</html>

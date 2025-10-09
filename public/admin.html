@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Dashboard - Suave Barbershop</title>
+    <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+      /* Navbar styling to match homepage exactly */
+      nav.navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(207, 12, 2, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+        /* Notification Dropdown Styles (copied from homepage) */
+        .notification-bell {
+         position: relative;
+         cursor: pointer;
+         margin-right: 1rem;
+        }
+
+        .notification-dropdown {
+          display: none;
+          position: absolute;
+          top: 50px;
+          right: 0;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          width: 350px;
+          max-height: 400px;
+          z-index: 1000;
+          border: 1px solid #e5e7eb;
+          overflow: hidden;
+        }
+
+        .notification-dropdown.show {
+          display: block;
+          animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .notification-dropdown-header {
+          background: #f8f9fa;
+          padding: 15px 20px;
+          border-bottom: 1px solid #e5e7eb;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .notification-dropdown-header h4 {
+          margin: 0;
+          color: #1f2937;
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .mark-all-read {
+          background: #cf0c02;
+          border: none;
+          color: white;
+          padding: 6px 10px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 12px;
+          transition: background 0.3s;
+        }
+
+        .mark-all-read:hover {
+          background: #a30901;
+        }
+
+        .notification-dropdown-content {
+          max-height: 320px;
+          overflow-y: auto;
+          padding: 10px 0;
+        }
+
+        .notification-dropdown-content::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .notification-dropdown-content::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+
+        .notification-dropdown-content::-webkit-scrollbar-thumb {
+          background: #cf0c02;
+          border-radius: 3px;
+        }
+
+        .notification-dropdown-item {
+          padding: 12px 20px;
+          border-bottom: 1px solid #f3f4f6;
+          cursor: pointer;
+          transition: background 0.2s;
+          color: #374151;
+        }
+
+        .notification-dropdown-item:hover {
+          background: #f9fafb;
+        }
+
+        .notification-dropdown-item:last-child {
+          border-bottom: none;
+        }
+
+        .notification-dropdown-item.unread {
+          background: #eff6ff;
+          border-left: 3px solid #3b82f6;
+        }
+
+        .notification-dropdown-item.unread:hover {
+          background: #dbeafe;
+        }
+
+        .notification-message {
+          font-size: 14px;
+          line-height: 1.4;
+          margin-bottom: 4px;
+          color: #374151;
+        }
+
+        .notification-date {
+          font-size: 12px;
+          color: #6b7280;
+        }
+
+        .notification-loading, .no-notifications {
+          text-align: center;
+          padding: 20px;
+          color: #6b7280;
+          font-size: 14px;
+        }
+
+        .no-notifications {
+          font-style: italic;
+        }
+
+        /* Responsive design for notification dropdown */
+        @media (max-width: 768px) {
+          .notification-dropdown {
+            width: 300px;
+            right: -20px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .notification-dropdown {
+            width: 280px;
+            right: -40px;
+          }
+        }
+
+      nav.navbar img {
+        height: 60px;
+        margin-right: 18px;
+        transition: transform 0.3s ease;
+      }
+
+      nav.navbar img:hover {
+        transform: scale(1.1);
+      }
+
+      nav.navbar h1 {
+        font-family: "Great Vibes", cursive;
+        font-size: 2.5rem;
+        margin: 0;
+        color: #cf0c02;
+        text-shadow: 2px 2px 10px rgba(207, 12, 2, 0.5);
+        flex-grow: 1;
+        margin-left: 1rem;
+      }
+
+      nav.navbar ul {
+        list-style: none;
+        display: flex;
+        margin: 0;
+        padding: 0;
+        gap: 2rem;
+        margin-left: auto;
+        margin-right: 2rem;
+      }
+
+      nav.navbar ul li {
+        display: inline;
+      }
+
+      nav.navbar ul li a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        position: relative;
+      }
+
+      nav.navbar ul li a::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: #cf0c02;
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+      }
+
+      nav.navbar ul li a:hover::before {
+        width: 100%;
+      }
+
+      nav.navbar ul li a:hover {
+        color: #cf0c02;
+        background: rgba(207, 12, 2, 0.1);
+      }
+
+      /* Active state for current page */
+      nav.navbar ul li a.active {
+        color: #cf0c02;
+        background: rgba(207, 12, 2, 0.15);
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(207, 12, 2, 0.2);
+      }
+
+      nav.navbar ul li a.active::before {
+        width: 100%;
+      }
+
+      nav.navbar .logout-btn {
+        background: #e74c3c;
+        border: none;
+        padding: 0.5rem 1rem;
+        color: white;
+        font-size: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        font-weight: 600;
+      }
+
+      nav.navbar .logout-btn:hover {
+        background: #c0392b;
+      }
+
+      /* Responsive navbar */
+      @media (max-width: 768px) {
+        nav.navbar {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem;
+        }
+        
+        nav.navbar ul {
+          gap: 0.5rem;
+          margin-left: 0;
+          margin-right: 0;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        
+        nav.navbar ul li a {
+          font-size: 0.8rem;
+          padding: 0.3rem 0.6rem;
+        }
+        
+        nav.navbar h1 {
+          font-size: 1.8rem;
+          margin-left: 0;
+        }
+        
+        nav.navbar img {
+          height: 50px;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        nav.navbar ul {
+          gap: 1rem;
+        }
+        
+        nav.navbar ul li a {
+          font-size: 0.9rem;
+          padding: 0.4rem 0.8rem;
+        }
+      }
+
+      /* Analytics module styling to match the modern design */
+      .analytics-module {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 16px;
+        padding: 32px;
+        margin: 24px 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      
+      .analytics-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+      }
+      
+      .analytics-info {
+        flex: 1;
+      }
+      
+      .analytics-title {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0 0 8px 0;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .analytics-value {
+        font-size: 36px;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 4px 0;
+        line-height: 1;
+      }
+      
+      .analytics-percentage {
+        font-size: 12px;
+        color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin: 4px 0 12px 0;
+      }
+      
+      .analytics-subtitle {
+        font-size: 13px;
+        color: #9ca3af;
+        margin: 0;
+        font-weight: 400;
+      }
+      
+      .period-selector {
+        display: flex;
+        gap: 4px;
+        background: #f3f4f6;
+        padding: 4px;
+        border-radius: 10px;
+      }
+      
+      .period-btn {
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #6b7280;
+        min-width: 60px;
+      }
+      
+      .period-btn.active {
+        background: #ffffff;
+        color: #1f2937;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      .period-btn:hover:not(.active) {
+        color: #374151;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      
+      .chart-container {
+        position: relative;
+        height: 200px;
+        margin-top: 24px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      
+      .loading-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #6b7280;
+        display: none;
+        font-size: 14px;
+      }
+      
+      .loading-spinner.show {
+        display: block;
+      }
+      
+      /* Custom chart styling */
+      #analyticsChart {
+        border-radius: 8px;
+      }
+
+      /* Customer distribution chart styling */
+      .customer-distribution-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+      }
+
+      .customer-distribution-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 16px 0;
+        text-align: center;
+      }
+
+      .service-distribution-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+      }
+
+      .service-distribution-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 16px 0;
+        text-align: center;
+      }
+
+      .service-donut-legend {
+        margin-top: 12px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: #4b5563;
+      }
+
+      .legend-swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        margin-right: 8px;
+        flex-shrink: 0;
+      }
+
+      /* Responsive charts */
+      @media (max-width: 768px) {
+        .charts-row {
+          flex-direction: column !important;
+        }
+        
+        .service-distribution-wrap,
+        .customer-distribution-wrap {
+          min-width: 100% !important;
+        }
+      }
+
+      /* Logout confirmation modal styles */
+      .logout-modal {
+        display: none;
+        position: fixed;
+        z-index: 11000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(3px);
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logout-modal .modal-box {
+        background: #fff;
+        color: #111827;
+        padding: 20px 24px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        max-width: 420px;
+        width: 90%;
+        text-align: center;
+      }
+
+      .logout-modal .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 16px;
+      }
+
+      .logout-confirm-btn {
+        background: #cf0c02;
+        color: #fff;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .logout-cancel-btn {
+        background: #6b7280;
+        color: #fff;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+ 
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <img
+        src="suavelogo.png"
+        alt="Suave Logo"
+      />
+      <h1>Suave Admin</h1>
+      <ul>
+        <li><a href="/admin" class="nav-link active">Dashboard</a></li>
+        <li><a href="/appointments" class="nav-link">View Appointments</a></li>
+        <li><a href="/schedule" class="nav-link">Barber Schedule</a></li>
+        <li><a href="/qr-settings" class="nav-link">QR Settings</a></li>
+        <li><a href="/barber-management" class="nav-link">Barber Management</a></li>
+      </ul>
+        <!-- Notification Bell -->
+        <div class="notification-bell" id="adminNotificationBell">
+          <i class="fas fa-bell"></i>
+          <span id="adminNotificationCount" class="notification-count" style="display: none;">0</span>
+          <div class="notification-dropdown" id="adminNotificationDropdown">
+            <div class="notification-dropdown-header">
+              <h4>Booking Notifications</h4>
+              <button id="adminMarkAllReadBtn" class="mark-all-read">Mark all as read</button>
+            </div>
+            <div class="notification-dropdown-content" id="adminNotificationDropdownContent">
+              <div class="notification-loading">Loading notifications...</div>
+            </div>
+          </div>
+        </div>
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard">
+      <p id="welcome" class="page-welcome"></p>
+
+      <!-- Employee Count -->
+      <div class="employee-stats">
+        <div class="stat-card">
+          <h3>Total Bookings</h3>
+          <p id="total-bookings">Loading...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Barbers</h3>
+          <p id="barber-count">Loading...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Haircut Services</h3>
+          <p id="haircut-count">Loading...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Cut and Shave Services</h3>
+          <p id="cut-and-shave-count">Loading...</p>
+        </div>
+      </div>
+
+      <!-- Analytics Module -->
+      <div class="analytics-module">
+        <div class="analytics-header">
+          <div class="analytics-info">
+            <h2 class="analytics-title">Dashboard Analytics</h2>
+            <p class="analytics-subtitle" id="analyticsSubtitle">Daily analytics overview for sales, services, and customer distribution</p>
+          </div>
+          <div class="period-selector">
+            <button class="period-btn active" data-period="day">Daily</button>
+            <button class="period-btn" data-period="week">Weekly</button>
+            <button class="period-btn" data-period="month">Monthly</button>
+          </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="analyticsChart"></canvas>
+            <div class="loading-spinner" id="loadingSpinner">Loading analytics data...</div>
+          </div>
+
+          <!-- Charts Row (Service Distribution and Customer Distribution) -->
+          <div class="charts-row" style="margin-top:18px; display: flex; gap: 2px; flex-wrap: wrap;">
+            <!-- Service distribution donut -->
+            <div class="service-distribution-wrap" style="flex: 1; min-width: 400px;">
+              <div class="service-distribution-card">
+                <h4 class="service-distribution-title">Service Distribution</h4>
+                <div class="service-donut-inner">
+                  <canvas id="serviceDonutChart"></canvas>
+                </div>
+                <div id="serviceDonutLegend" class="service-donut-legend"></div>
+              </div>
+            </div>
+
+            <!-- Customer distribution bar chart -->
+            <div class="customer-distribution-wrap" style="flex: 1; min-width: 400px;">
+              <div class="customer-distribution-card">
+                <h4 class="customer-distribution-title">Customer Distribution by Barber</h4>
+                <div class="customer-bar-inner" style="height: 280px; position: relative;">
+                  <canvas id="customerBarChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Shared Admin Notification Manager -->
+    <script src="admin-notifications.js"></script>
+
+    <script>
+      // ========== ADMIN NOTIFICATION BELL (Now handled by shared manager) ==========
+      // The notification functionality is now handled by admin-notifications.js
+      let analyticsChart = null;
+      let currentPeriod = 'day';
+
+      // Fetch admin welcome message and stats
+      async function fetchAdminData() {
+        try {
+          const res = await fetch("/api/admin-dashboard");
+          if (res.ok) {
+            const data = await res.json();
+            document.getElementById("welcome").textContent = data.message;
+          } else {
+            window.location.href = "/login"; // Not authorized
+          }
+        } catch (err) {
+          console.error("Error:", err);
+          window.location.href = "/login";
+        }
+      }
+
+      // Load admin stats
+      async function loadAdminStats(period = 'day') {
+        try {
+          console.log("Loading admin stats for period:", period);
+          const res = await fetch(`/api/admin/stats?period=${period}`);
+          console.log("Admin stats response status:", res.status);
+          
+          if (res.ok) {
+            const data = await res.json();
+            console.log("Admin stats data:", data);
+            
+            if (data.success) {
+              document.getElementById("total-bookings").textContent = data.stats.totalBookings || "0";
+              document.getElementById("barber-count").textContent = data.stats.barberCount || "0";
+              document.getElementById("haircut-count").textContent = data.stats.haircutCount || "0";
+              document.getElementById("cut-and-shave-count").textContent = data.stats.cutAndShaveCount || "0";
+              console.log("Stats updated successfully for period:", period);
+            } else {
+              console.error("API returned success: false", data);
+            }
+          } else {
+            console.error("Failed to fetch stats, status:", res.status);
+            const errorText = await res.text();
+            console.error("Error response:", errorText);
+          }
+        } catch (err) {
+          console.error("Error loading stats:", err);
+        }
+      }
+      
+      // Fetch analytics data (reuse the same endpoint as superadmin)
+      async function fetchAnalyticsData(period) {
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        loadingSpinner.classList.add('show');
+        
+        try {
+          const response = await fetch(`/api/superadmin/analytics?period=${period}`);
+          if (response.ok) {
+            const data = await response.json();
+            updateChart(data);
+          } else {
+            console.error('Failed to fetch analytics data');
+          }
+        } catch (error) {
+          console.error('Error fetching analytics:', error);
+        } finally {
+          loadingSpinner.classList.remove('show');
+        }
+      }
+
+      // Update chart with new data
+      function updateChart(data) {
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        
+        if (analyticsChart) {
+          analyticsChart.destroy();
+        }
+
+        // Create gradient for the line and fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.2)'); // Indigo at top
+        gradient.addColorStop(0.5, 'rgba(139, 69, 193, 0.1)'); // Purple in middle  
+        gradient.addColorStop(1, 'rgba(219, 39, 119, 0.05)'); // Pink at bottom
+
+        const lineGradient = ctx.createLinearGradient(0, 0, 0, 180);
+        lineGradient.addColorStop(0, '#6366f1'); // Indigo
+        lineGradient.addColorStop(0.5, '#8b45c1'); // Purple
+        lineGradient.addColorStop(1, '#db2777'); // Pink
+
+        analyticsChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.labels || [],
+            datasets: [{
+              data: data.datasets?.[0]?.data || [],
+              borderColor: lineGradient,
+              backgroundColor: gradient,
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4, // Smooth curves
+              pointBackgroundColor: '#ffffff',
+              pointBorderColor: '#6366f1',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: '#ffffff',
+              pointHoverBorderColor: '#6366f1',
+              pointHoverBorderWidth: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false // Hide legend to match design
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: '#6366f1',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: false,
+                padding: 12,
+                titleFont: {
+                  size: 13,
+                  weight: '600'
+                },
+                bodyFont: {
+                  size: 12
+                },
+                callbacks: {
+                  title: function(context) {
+                    return context[0].label;
+                  },
+                  label: function(context) {
+                    return `₱${context.parsed.y.toLocaleString()}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                display: true,
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Sales Revenue (₱)',
+                  color: '#6b7280',
+                  font: {
+                    size: 12,
+                    weight: 'bold'
+                  }
+                },
+                grid: {
+                  color: 'rgba(107, 114, 128, 0.1)'
+                },
+                ticks: {
+                  color: '#6b7280',
+                  font: {
+                    size: 11
+                  },
+                  callback: function(value) {
+                    return '₱' + value.toLocaleString();
+                  }
+                }
+              },
+              x: {
+                display: true,
+                title: {
+                  display: true,
+                  text: 'Date',
+                  color: '#6b7280',
+                  font: {
+                    size: 12,
+                    weight: 'bold'
+                  }
+                },
+                grid: {
+                  color: 'rgba(107, 114, 128, 0.1)'
+                },
+                ticks: {
+                  color: '#6b7280',
+                  font: {
+                    size: 11
+                  },
+                  maxTicksLimit: 8
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'index'
+            },
+            elements: {
+              point: {
+                radius: 4,
+                hoverRadius: 6
+              }
+            },
+            layout: {
+              padding: {
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 10
+              }
+            }
+          }
+        });
+      }
+
+      // Handle period button clicks - now controls ALL charts
+      function setupPeriodButtons() {
+        const periodButtons = document.querySelectorAll('.period-btn');
+        
+        periodButtons.forEach(button => {
+          button.addEventListener('click', async () => {
+            // Remove active class from all buttons
+            periodButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            // Update current period
+            currentPeriod = button.dataset.period;
+            
+            // Update all charts and stats with the new period
+            await Promise.all([
+              fetchAnalyticsData(currentPeriod),
+              fetchServiceDistribution(currentPeriod),
+              fetchCustomerDistribution(currentPeriod),
+              loadAdminStats(currentPeriod)
+            ]);
+            
+            // Update subtitle based on period
+            const subtitle = document.getElementById('analyticsSubtitle');
+            if (subtitle) {
+              switch(currentPeriod) {
+                case 'day':
+                  subtitle.textContent = 'Daily analytics overview - Last 30 days';
+                  break;
+                case 'week':
+                  subtitle.textContent = 'Weekly analytics overview - Last 12 weeks';
+                  break;
+                case 'month':
+                  subtitle.textContent = 'Monthly analytics overview - Last 12 months';
+                  break;
+              }
+            }
+          });
+        });
+      }
+
+    // Service distribution donut
+    let serviceDonutChart = null;
+    async function fetchServiceDistribution(period = 'day') {
+      try {
+        console.log('🍩 Fetching service distribution for period:', period);
+        const res = await fetch(`/api/superadmin/service-distribution?period=${period}`, { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const json = await res.json();
+        console.log('🍩 Service distribution response:', JSON.stringify(json, null, 2));
+        const dist = json.distribution || [];
+        const labels = dist.map(d => d.service);
+        const values = dist.map(d => d.count);
+
+        const canvas = document.getElementById('serviceDonutChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        if (serviceDonutChart) serviceDonutChart.destroy();
+
+        serviceDonutChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'],
+              hoverOffset: 6,
+              cutout: '72%'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+
+        // render legend
+        const legendEl = document.getElementById('serviceDonutLegend');
+        if (legendEl) {
+          legendEl.innerHTML = '';
+          const total = values.reduce((a, b) => a + b, 0) || 0;
+          dist.forEach((d, i) => {
+            const pct = total ? Math.round((d.count / total) * 100) : 0;
+            const item = document.createElement('div');
+            item.className = 'legend-item';
+            item.innerHTML = `<span class="legend-swatch" style="background:${serviceDonutChart.data.datasets[0].backgroundColor[i]};"></span> ${d.service} — ${d.count} (${pct}%)`;
+            legendEl.appendChild(item);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load service distribution', err);
+      }
+    }
+
+    // Customer distribution bar chart
+    let customerBarChart = null;
+    async function fetchCustomerDistribution(period = 'day') {
+      try {
+        console.log('📊 Fetching customer distribution for period:', period);
+        const res = await fetch(`/api/superadmin/customer-distribution?period=${period}`, { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const json = await res.json();
+        console.log('📊 Customer distribution response:', JSON.stringify(json, null, 2));
+        const dist = json.distribution || [];
+        const labels = dist.map(d => d.barber);
+        const values = dist.map(d => d.count);
+
+        const canvas = document.getElementById('customerBarChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        if (customerBarChart) customerBarChart.destroy();
+
+        // Create gradient for bars
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, '#3b82f6'); // Blue at top
+        gradient.addColorStop(1, '#1d4ed8'); // Darker blue at bottom
+
+        customerBarChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Customers Served',
+              data: values,
+              backgroundColor: gradient,
+              borderColor: '#2563eb',
+              borderWidth: 1,
+              borderRadius: 6,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: '#3b82f6',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: false,
+                padding: 12,
+                callbacks: {
+                  label: function(context) {
+                    return `${context.parsed.y} customers served`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Number of Customers',
+                  color: '#6b7280',
+                  font: {
+                    size: 12,
+                    weight: 'bold'
+                  }
+                },
+                grid: {
+                  color: 'rgba(107, 114, 128, 0.1)'
+                },
+                ticks: {
+                  color: '#6b7280',
+                  font: {
+                    size: 11
+                  },
+                  stepSize: 1
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Barbers',
+                  color: '#6b7280',
+                  font: {
+                    size: 12,
+                    weight: 'bold'
+                  }
+                },
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: '#6b7280',
+                  font: {
+                    size: 11
+                  },
+                  maxRotation: 45
+                }
+              }
+            },
+            layout: {
+              padding: {
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 10
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Failed to load customer distribution', err);
+      }
+    }
+
+    // Logout is handled by the confirmation modal added below
+
+      // Initialize dashboard
+      async function initializeDashboard() {
+        await fetchAdminData();
+        setupPeriodButtons();
+        await Promise.all([
+          fetchAnalyticsData(currentPeriod),
+          fetchServiceDistribution(currentPeriod),
+          fetchCustomerDistribution(currentPeriod),
+          loadAdminStats(currentPeriod)
+        ]);
+        // Notifications are now handled by admin-notifications.js
+      }
+
+      // Start the application
+    
+          // Ensure chart redraws to fit the new container after initial render and on resize
+          window.addEventListener('load', function() {
+            setTimeout(() => { if (analyticsChart && typeof analyticsChart.resize === 'function') analyticsChart.resize(); }, 250);
+          });
+
+          let resizeTimeout;
+          window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+              try { if (analyticsChart && typeof analyticsChart.resize === 'function') analyticsChart.resize(); } catch(e){}
+            }, 200);
+          });
+      initializeDashboard();
+    </script>
+      <!-- Logout Confirmation Modal -->
+      <div id="logoutModal" class="logout-modal">
+        <div class="modal-box">
+          <h3>Confirm Logout</h3>
+          <p>Are you sure you want to log out?</p>
+          <div class="modal-actions">
+            <button id="confirmLogout" class="logout-confirm-btn">Yes, log me out</button>
+            <button id="cancelLogout" class="logout-cancel-btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        // Logout confirmation modal logic
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutModal = document.getElementById('logoutModal');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const cancelLogout = document.getElementById('cancelLogout');
+
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            logoutModal.style.display = 'flex';
+          });
+        }
+
+        if (cancelLogout) {
+          cancelLogout.addEventListener('click', function() {
+            logoutModal.style.display = 'none';
+          });
+        }
+
+        // Close modal when clicking outside
+        logoutModal.addEventListener('click', function(e) {
+          if (e.target === logoutModal) logoutModal.style.display = 'none';
+        });
+
+        if (confirmLogout) {
+          confirmLogout.addEventListener('click', async function() {
+            try {
+              const res = await fetch('/api/logout', { method: 'POST' });
+              if (res.ok) {
+                window.location.href = '/main';
+              } else {
+                alert('Logout failed. Please try again.');
+              }
+            } catch (err) {
+              alert('Logout failed. Please try again.');
+            }
+          });
+        }
+      </script>
+  </body>
+</html>

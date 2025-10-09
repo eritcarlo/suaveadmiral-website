@@ -1,0 +1,718 @@
+body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: #000;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding-top: 0;
+      }
+      
+      #loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      #loader img {
+        width: 200px;
+        animation: zoomIn 2s ease-in-out infinite alternate;
+      }
+      @keyframes zoomIn {
+        from {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+        to {
+          transform: scale(1.15);
+          opacity: 1;
+        }
+      }
+      /* ====== NAVBAR ====== */
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(207, 12, 2, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        flex-wrap: wrap;
+      }
+
+      nav img {
+        height: 60px;
+        transition: transform 0.3s ease;
+      }
+
+      nav img:hover {
+        transform: scale(1.1);
+      }
+
+      .brand-name {
+        font-family: 'Great Vibes', cursive;
+        font-size: 2.5rem;
+        color: #cf0c02;
+        margin-left: 1rem;
+        text-shadow: 2px 2px 10px rgba(207, 12, 2, 0.5);
+      }
+
+      nav ul {
+        list-style: none;
+        display: flex;
+        gap: 2rem;
+        margin: 0;
+        padding: 0;
+        margin-left: auto;
+        margin-right: 2rem;
+      }
+
+      nav ul li a {
+        font-weight: 500;
+        font-size: 1rem;
+        color: #fff;
+        text-decoration: none;
+        position: relative;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+      }
+
+      nav ul li a::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: #cf0c02;
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+      }
+
+      nav ul li a:hover::before {
+        width: 100%;
+      }
+
+      nav ul li a:hover {
+        color: #cf0c02;
+        background: rgba(207, 12, 2, 0.1);
+      }
+
+      /* ====== NOTIFICATION BELL ====== */
+      .notification-bell {
+        margin-right: 20px;
+        position: relative;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+      }
+
+      .notification-bell:hover {
+        background: rgba(207, 12, 2, 0.1);
+        transform: scale(1.1);
+      }
+
+      .notification-bell i {
+        font-size: 24px;
+        color: white;
+        transition: color 0.3s ease;
+      }
+
+      .notification-bell:hover i {
+        color: #cf0c02;
+      }
+
+      .notification-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #cf0c02;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #000;
+        box-shadow: 0 2px 8px rgba(207, 12, 2, 0.3);
+      }
+
+      /* ====== PROFILE DROPDOWN ====== */
+      .profile-dropdown {
+        position: relative;
+        display: inline-block;
+        z-index: 1001;
+      }
+
+      .profile {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid #cf0c02;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(207, 12, 2, 0.3);
+      }
+
+      .profile:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(207, 12, 2, 0.5);
+      }
+
+      .profile img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 60px;
+        background: rgba(26, 26, 26, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(207, 12, 2, 0.3);
+        border-radius: 10px;
+        min-width: 180px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        z-index: 1002;
+        flex-direction: column;
+        padding: 10px 0;
+      }
+
+      .dropdown-menu.show {
+        display: flex;
+      }
+
+      .dropdown-menu a {
+        display: block;
+        padding: 12px 24px;
+        text-decoration: none;
+        color: #fff;
+        font-weight: 500;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .dropdown-menu a:hover {
+        background: rgba(207, 12, 2, 0.2);
+        color: #cf0c02;
+      }
+
+      /* ====== NOTIFICATION DROPDOWN STYLES ====== */
+      .notification-dropdown {
+        display: none;
+        position: absolute;
+        top: 50px;
+        right: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 350px;
+        max-height: 400px;
+        z-index: 1000;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+      }
+      
+      .notification-dropdown.show {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+      }
+      
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .notification-dropdown-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .notification-dropdown-header h4 {
+        margin: 0;
+        color: #1f2937;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      
+      .mark-all-read {
+        background: #cf0c02;
+        border: none;
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.3s;
+      }
+      
+      .mark-all-read:hover {
+        background: #a30901;
+      }
+      
+      .notification-dropdown-content {
+        max-height: 320px;
+        overflow-y: auto;
+        padding: 10px 0;
+      }
+      
+      .notification-dropdown-content::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      .notification-dropdown-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      
+      .notification-dropdown-content::-webkit-scrollbar-thumb {
+        background: #cf0c02;
+        border-radius: 3px;
+      }
+      
+      .notification-dropdown-item {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f3f4f6;
+        cursor: pointer;
+        transition: background 0.2s;
+        color: #374151;
+      }
+      
+      .notification-dropdown-item:hover {
+        background: #f9fafb;
+      }
+      
+      .notification-dropdown-item:last-child {
+        border-bottom: none;
+      }
+      
+      .notification-dropdown-item.unread {
+        background: #eff6ff;
+        border-left: 3px solid #3b82f6;
+      }
+      
+      .notification-dropdown-item.unread:hover {
+        background: #dbeafe;
+      }
+      
+      .notification-message {
+        font-size: 14px;
+        line-height: 1.4;
+        margin-bottom: 4px;
+        color: #374151;
+      }
+      
+      .notification-date {
+        font-size: 12px;
+        color: #6b7280;
+      }
+      
+      .notification-loading, .no-notifications {
+        text-align: center;
+        padding: 20px;
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      .no-notifications {
+        font-style: italic;
+      }
+
+      /* ====== MOBILE RESPONSIVE ====== */
+      @media (max-width: 768px) {
+        .page-wrapper {
+          padding-top: 0;
+        }
+
+        nav {
+          flex-direction: row;
+          justify-content: space-between;
+          padding: 1rem;
+        }
+        
+        nav ul {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1rem;
+          margin-left: 0;
+          margin-right: 0;
+          width: 100%;
+          justify-content: center;
+        }
+        
+        nav ul li a {
+          font-size: 1rem;
+        }
+        
+        .brand-name {
+          font-size: 2rem;
+          margin-left: 0;
+        }
+        
+        nav img {
+          height: 50px;
+        }
+
+        .notification-dropdown {
+          width: 300px;
+          right: -20px;
+        }
+
+        .profile-container {
+          padding: 20px 10px;
+          margin-top: 0;
+        }
+
+        .profile-card {
+          width: 100%;
+          max-width: 350px;
+          padding: 30px 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .page-wrapper {
+          padding-top: 0;
+        }
+        .notification-dropdown {
+          width: 280px;
+          right: -40px;
+        }
+      }
+      .profile-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .profile-content-flex {
+        display: flex;
+        flex-direction: row;
+        gap: 40px;
+        width: 100%;
+        max-width: 1100px;
+        background: none;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+      @media (max-width: 900px) {
+        .profile-content-flex {
+          flex-direction: column;
+          gap: 0;
+          align-items: stretch;
+        }
+        .profile-main {
+          margin-top: 20px;
+          width: 100%;
+        }
+        .profile-left {
+          margin-bottom: 20px;
+          width: 100%;
+          min-width: 0;
+        }
+      }
+      @media (max-width: 600px) {
+        .profile-content-flex {
+          flex-direction: column;
+          gap: 0;
+          align-items: stretch;
+        }
+        .profile-main {
+          gap: 10px;
+          margin-top: 10px;
+          width: 100%;
+        }
+        .profile-left {
+          padding: 20px 10px;
+          min-width: 0;
+          width: 100%;
+        }
+      }
+      .profile-left {
+        background: #1a1a1a;
+        border-radius: 15px;
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.6);
+        padding: 40px 30px;
+        min-width: 260px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .profile-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        min-width: 0;
+      }
+      .profile-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 38px 48px;
+        margin-top: 0;
+        align-items: stretch;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .profile-info > div {
+  background: #232323;
+  padding: 32px 28px 26px 28px;
+  border-radius: 18px;
+  min-width: 0;
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 16px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+      }
+
+      /* Password card specific tweaks to avoid overlapping of elements */
+      .password-card {
+        padding: 18px 20px;
+        border-radius: 10px;
+        background: #2c2c2c;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 120px;
+        box-sizing: border-box;
+      }
+
+      /* Ensure the masked password and the change button don't overlap */
+      .password-card .masked-password {
+        background: #222;
+        color: white;
+        border-radius: 5px;
+        padding: 12px 14px;
+        display: block;
+        width: 100%;
+        font-size: 1rem;
+        margin: 0;
+      }
+
+      .password-card .change-row {
+        display: flex;
+        justify-content: flex-start; /* align to left on desktop */
+        align-items: center;
+        gap: 12px;
+      }
+
+      .password-card .change-row .edit-btn {
+        margin: 0;
+      }
+
+      @media (max-width: 600px) {
+        .password-card {
+          min-height: 100px;
+          padding: 14px 12px;
+        }
+      }
+      /* Extra responsive fixes to make the whole page behave on small devices */
+      @media (max-width: 480px) {
+        body {
+          padding-top: 10px;
+        }
+        nav {
+          padding: 10px 12px;
+        }
+        .brand-name {
+          font-size: 1.6rem;
+        }
+        .profile-container {
+          padding: 12px 8px;
+          margin-top: 0;
+        }
+        .profile-content-flex {
+          gap: 12px;
+        }
+        .profile-left {
+          padding: 18px 14px;
+        }
+        .profile-info {
+          grid-template-columns: 1fr;
+          gap: 18px;
+        }
+        .profile-info > div,
+        .password-card {
+          padding: 16px;
+          border-radius: 12px;
+          min-height: auto;
+        }
+        .password-card .masked-password {
+          padding: 10px 12px;
+          font-size: 0.95rem;
+        }
+        .profile-info a.edit-btn,
+        #saveProfileBtn {
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .profile-main > div {
+          justify-content: center;
+        }
+        /* Prevent horizontal overflow from long text */
+        .profile-left, .profile-main, .profile-container {
+          overflow-x: hidden;
+        }
+      }
+      .profile-info label {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 1.08rem;
+        letter-spacing: 0.5px;
+      }
+      .profile-info input,
+      .profile-info select {
+        background: #222;
+        color: white;
+        border-radius: 5px;
+        padding: 12px 14px;
+        width: 100%;
+        margin-top: 0;
+        border: none;
+        box-sizing: border-box;
+        font-size: 1rem;
+        margin-bottom: 2px;
+      }
+      .profile-info span {
+        background: #222;
+        color: white;
+        border-radius: 5px;
+        padding: 12px 14px;
+        display: inline-block;
+        width: 100%;
+        margin-top: 0;
+        font-size: 1rem;
+        margin-bottom: 8px;
+      }
+      .profile-info a.edit-btn {
+  margin-left: 0;
+  text-decoration: none;
+  color: white;
+  margin-top: 16px;
+  display: inline-block;
+  width: 160px;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+      }
+      .profile-main > div {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+        margin-top: 10px;
+      }
+      @media (max-width: 1100px) {
+        .profile-container > div {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .profile-main {
+          margin-top: 20px;
+        }
+      }
+      @media (max-width: 900px) {
+        .profile-container {
+          padding: 20px 5px;
+        }
+        .profile-info {
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+        .profile-main > div {
+          justify-content: center;
+        }
+      }
+      @media (max-width: 600px) {
+        .profile-container {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 10px 2px;
+        }
+        .profile-left {
+          padding: 20px 10px;
+          min-width: 0;
+        }
+        .profile-main {
+          gap: 15px;
+        }
+        .profile-info {
+          grid-template-columns: 1fr;
+          gap: 22px;
+        }
+        .profile-main > div {
+          margin-top: 5px;
+        }
+      }
+      .edit-btn {
+        background: #cf0c02;
+        border: none;
+        color: white;
+        font-size: 14px;
+        padding: 4px 8px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .edit-btn:hover {
+        background: #a30901;
+      }
+      footer {
+        background-color: #333;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        margin-top: auto;
+      }
+      #profile-pic-input {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .mobile-menu-btn {
+          display: block;
+        }
+      }

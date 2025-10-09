@@ -1,0 +1,379 @@
+/* Reset & Fonts */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body,
+html {
+  height: 100%;
+}
+
+/* Layout */
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.left-side {
+  flex: 1;
+  background: url("barbershop.jpg") no-repeat center center/cover;
+}
+
+.right-side {
+  flex: 1;
+  background: linear-gradient(to bottom, #555, #333);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-box {
+  width: 80%;
+  max-width: 350px;
+}
+
+/* Input Fields */
+.login-box input[type="text"],
+.login-box input[type="password"],
+.login-box input[type="email"] {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 4px;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+}
+
+.login-box input::placeholder {
+  color: #aaa;
+}
+
+/* Password Field with Toggle */
+.password-wrapper {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+}
+
+/* Login Options (Remember Me and Forgot Password) */
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+  font-size: 14px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.remember-me input[type="checkbox"] {
+  margin-right: 10px;
+  accent-color: #333; /* Checkbox color (modern browsers) */
+}
+
+.remember-me label {
+  color: #aaa;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-me label:hover {
+  color: #ccc;
+}
+
+/* Forgot Password */
+.forgot {
+  font-size: 13px;
+  color: #aaa;
+  text-decoration: none;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+  color: #ccc;
+}
+
+/* Buttons */
+.login-box button {
+  width: 100%;
+  padding: 15px;
+  background: #ccc;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.login-box button:hover {
+  background: #bbb;
+}
+
+/* Sign Up Link */
+.signup-text {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ccc;
+  text-align: center;
+}
+
+.signup-text a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.signup-text a:hover {
+  text-decoration: underline;
+}
+
+/* Modal Dialog */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 15% auto;
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close:hover {
+  color: #000;
+}
+
+#modal-message {
+  margin: 20px 0;
+  font-size: 16px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.modal-btn {
+  background: #cf0c02;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.modal-btn:hover {
+  background: #a30a00;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ====== RESPONSIVE DESIGN ====== */
+
+/* Tablet styles */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  
+  .left-side {
+    flex: 0.4;
+    min-height: 200px;
+  }
+  
+  .right-side {
+    flex: 0.6;
+    padding: 20px;
+  }
+  
+  .login-box {
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  .login-box input[type="text"],
+  .login-box input[type="password"],
+  .login-box input[type="email"] {
+    padding: 18px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    margin: 12px 0;
+  }
+  
+  .login-box button {
+    padding: 18px;
+    font-size: 16px;
+    margin: 15px 0;
+  }
+  
+  .login-box a {
+    font-size: 15px;
+    margin: 10px 0;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  .container {
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .left-side {
+    flex: 0.3;
+    min-height: 150px;
+    background-position: center;
+    background-size: cover;
+  }
+  
+  .right-side {
+    flex: 0.7;
+    padding: 15px;
+    justify-content: flex-start;
+    padding-top: 30px;
+  }
+  
+  .login-box {
+    width: 95%;
+    max-width: none;
+  }
+  
+  .login-box input[type="text"],
+  .login-box input[type="password"],
+  .login-box input[type="email"] {
+    padding: 20px 15px;
+    font-size: 16px;
+    margin: 15px 0;
+    border-radius: 8px;
+  }
+  
+  .login-box button {
+    padding: 20px;
+    font-size: 16px;
+    margin: 20px 0;
+    border-radius: 8px;
+    width: 100%;
+  }
+  
+  .login-box a {
+    font-size: 14px;
+    margin: 12px 0;
+    display: block;
+    text-align: center;
+  }
+  
+  /* Modal responsive adjustments */
+  .modal-content {
+    width: 95%;
+    margin: 10px;
+    padding: 20px;
+  }
+  
+  .modal-content h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .modal-content input {
+    padding: 15px;
+    font-size: 16px;
+    margin: 10px 0;
+  }
+  
+  .modal-btn {
+    padding: 15px 25px;
+    font-size: 14px;
+    margin: 5px;
+    width: 100%;
+    border-radius: 8px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 320px) {
+  .left-side {
+    min-height: 120px;
+  }
+  
+  .right-side {
+    padding: 10px;
+    padding-top: 20px;
+  }
+  
+  .login-box {
+    width: 100%;
+  }
+  
+  .login-box input[type="text"],
+  .login-box input[type="password"],
+  .login-box input[type="email"] {
+    padding: 18px 12px;
+    font-size: 16px;
+  }
+  
+  .modal-content {
+    width: 98%;
+    margin: 5px;
+    padding: 15px;
+  }
+}

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Appointment - Suave Barbershop</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="barber.css" />
+    <script src="profile-manager.js"></script>
+  </head>
+  <body>
+    <!-- Loader -->
+    <div id="loader">
+      <img src="suavelogo.png" alt="Loading..." />
+    </div>
+
+    <div class="page-wrapper">
+      <!-- Navbar (matching homepage) -->
+      <nav>
+        <img src="suavelogo.png" alt="Suave Logo" />
+        <h1 class="brand-name">Suave Barbershop</h1>
+        <ul>
+          <li><a href="/home" class="nav-link">HOME</a></li>
+          <li><a href="javascript:void(0)" class="nav-link active" id="navBookNowBtn">BOOK NOW</a></li>
+          <li><a href="/mybookings" class="nav-link">MY BOOKINGS</a></li>
+        </ul>
+
+        <div class="navbar-right">
+          <!-- Notifications -->
+          <div class="notification-bell" id="notificationBell">
+            <i class="fas fa-bell"></i>
+            <span id="notificationCount" class="notification-count" style="display: none;">0</span>
+            
+            <!-- Notification Dropdown -->
+            <div class="notification-dropdown" id="notificationDropdown">
+              <div class="notification-dropdown-header">
+                <h4>Notifications</h4>
+                <button class="mark-all-read" id="markAllReadBtn" title="Mark all as read">
+                  <i class="fas fa-check-double"></i>
+                </button>
+              </div>
+              <div class="notification-dropdown-content" id="notificationDropdownContent">
+                <div class="notification-loading">Loading notifications...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-dropdown">
+            <div class="profile" id="profileBtn">
+              <img id="navbar-profile-pic" src="default-profile.svg" alt="Profile" />
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+              <a href="/profile">Profile</a>
+              <a href="/forgot">Change Password</a>
+              <a href="javascript:void(0)" id="logoutBtn">Logout</a>
+            </div>
+          </div>
+        </div>
+      </nav>    <!-- Booking Content -->
+      <div class="container">
+        <!-- Booking Limit Display -->
+        <div id="booking-limit-display" class="booking-info" style="display: none;">
+          <div class="booking-count" style="display: none;"> <!-- hidden visually but kept for JS -->
+            <i class="fas fa-calendar-check"></i>
+            <span id="booking-count-text" style="display: none;">Active Bookings: 0/3</span>
+          </div>
+          <div id="booking-limit-warning" class="warning-message" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>You have reached the maximum limit of 3 active bookings. Please complete or cancel existing bookings before making a new one.</span>
+          </div>
+        </div>
+
+        <h2>SELECT PREFERRED BARBER</h2>
+        <div id="barber-list" class="barber-selection"></div>
+
+        <h2 id="date-heading" style="display: none;">SELECT DATE</h2>
+        <div class="date-selection" id="date-selection" style="display: none;">
+          <input type="date" id="booking-date" min="" required />
+        </div>
+
+        <h2 id="time-heading" style="display: none;">AVAILABLE TIME</h2>
+    <div id="time-list" class="time-selection" style="display: none;"></div>
+
+        <button id="book-btn" class="payment-btn service-link" style="display: none;">
+          CONFIRM BOOKING
+        </button>
+
+        <!-- Payment Section (Hidden by default) -->
+        <div id="payment-section" class="payment-section" style="display: none">
+          <h2>PAYMENT</h2>
+
+          <!-- Payment Method Selection -->
+          <div class="payment-method-section">
+            <h3>SELECT PAYMENT METHOD</h3>
+            <div class="payment-methods">
+              <div class="payment-option" data-method="cash">
+                <input type="radio" id="cash" name="payment" value="cash" />
+                <label for="cash">Cash</label>
+              </div>
+              <div class="payment-option" data-method="gcash">
+                <input type="radio" id="gcash" name="payment" value="gcash" />
+                <label for="gcash">GCash</label>
+              </div>
+              <div class="payment-option" data-method="paymaya">
+                <input type="radio" id="paymaya" name="payment" value="paymaya" />
+                <label for="paymaya">PayMaya</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- QR Code Display (Hidden by default) -->
+          <div id="qr-section" class="qr-section" style="display: none">
+            <div class="service-price-display">
+              <div class="price-info">
+                <span id="service-name-display"></span>
+                <span id="service-price-display" class="price-amount"></span>
+              </div>
+            </div>
+            <h3>Scan QR Code to Pay</h3>
+            <div class="qr-codes">
+              <div class="qr-item" id="gcash-qr-item" style="display: none">
+                <h4>GCash</h4>
+                <img id="gcash-qr" src="" alt="GCash QR Code" class="qr-image" />
+              </div>
+              <div class="qr-item" id="paymaya-qr-item" style="display: none">
+                <h4>PayMaya</h4>
+                <img
+                  id="paymaya-qr"
+                  src=""
+                  alt="PayMaya QR Code"
+                  class="qr-image"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Cash Payment Price Display -->
+          <div id="cash-price-section" class="cash-price-section" style="display: none">
+            <div class="service-price-display">
+              <div class="price-info">
+                <span id="cash-service-name-display"></span>
+                <span id="cash-service-price-display" class="price-amount"></span>
+              </div>
+              <div class="cash-payment-note">
+                <span>Please prepare exact amount for cash payment</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reference Number Input -->
+          <div id="reference-section" class="reference-section" style="display: none;">
+            <h3>PAYMENT REFERENCE NUMBER</h3>
+            <div class="reference-input">
+              <input
+                type="text"
+                id="reference-number"
+                placeholder="Enter your payment reference number"
+                required
+              />
+              <small id="reference-instruction"
+                >Please enter the reference number from your payment</small
+              >
+            </div>
+          </div>
+
+          <div class="payment-buttons">
+            <button id="submit-booking" class="payment-btn service-link">
+              SUBMIT BOOKING
+            </button>
+            <button id="cancel-booking" class="cancel-btn">CANCEL</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Dialog -->
+      <div id="modal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <div id="modal-message"></div>
+          <button id="modal-ok" class="modal-btn">OK</button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer>
+        © Marco Lorenzo Reyes, Rasheed Kenian Saladino, Angelo Fronda and John
+        Carlo Erit
+      </footer>
+    </div>
+
+    <script>
+      // Modal functions
+      function showModal(message) {
+        document.getElementById("modal-message").textContent = message;
+        document.getElementById("modal").style.display = "block";
+      }
+
+      function hideModal() {
+        document.getElementById("modal").style.display = "none";
+      }
+
+      // Modal event listeners
+      document.querySelector(".close").addEventListener("click", hideModal);
+      document.getElementById("modal-ok").addEventListener("click", hideModal);
+      document.getElementById("modal").addEventListener("click", function (e) {
+        if (e.target === this) hideModal();
+      });
+
+      // Loader effect
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          document.getElementById("loader").style.display = "none";
+        }, 1200);
+      });
+
+      // Navigation loader effect
+      function addLoaderEffect(selector) {
+        document.querySelectorAll(selector).forEach((link) => {
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+            const loader = document.getElementById("loader");
+            loader.style.display = "flex";
+            setTimeout(() => {
+              window.location.href = this.href;
+            }, 800);
+          });
+        });
+      }
+      addLoaderEffect(".nav-link");
+
+            // ========= Profile Dropdown =========
+      const profileBtn = document.getElementById("profileBtn");
+      const dropdownMenu = document.getElementById("dropdownMenu");
+      
+      if (profileBtn && dropdownMenu) {
+        profileBtn.addEventListener("click", function(e) {
+          e.stopPropagation();
+          dropdownMenu.classList.toggle("show");
+        });
+
+        document.addEventListener("click", function(e) {
+          if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.remove("show");
+          }
+        });
+      }
+
+      // ========= Notification Bell =========
+      const notificationBell = document.getElementById('notificationBell');
+      const notificationDropdown = document.getElementById('notificationDropdown');
+      
+      if (notificationBell) {
+        notificationBell.addEventListener('click', function(e) {
+          e.stopPropagation();
+          notificationDropdown.classList.toggle('show');
+          
+          // Load notifications when dropdown is opened
+          if (notificationDropdown.classList.contains('show')) {
+            loadDropdownNotifications();
+          }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!notificationBell.contains(e.target)) {
+            notificationDropdown.classList.remove('show');
+          }
+        });
+      }
+      
+      // Mark all notifications as read
+      const markAllReadBtn = document.getElementById('markAllReadBtn');
+      if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          markAllNotificationsAsRead();
+        });
+      }
+
+      // Profile picture loading is now handled by ProfileManager
+      
+      // Load notifications
+      loadNotifications();
+
+      // ========= Navbar Book Now Button =========
+      const navBookNowBtn = document.getElementById("navBookNowBtn");
+      if (navBookNowBtn) {
+        navBookNowBtn.addEventListener("click", function(e) {
+          e.preventDefault();
+          // Redirect to homepage to select service
+          window.location.href = "/home";
+        });
+      }
+
+      // Logout is handled by logout-confirm.js (confirmation modal)
+
+      // Load barbers (with optional date filtering)
+      async function loadBarbers(selectedDate = null, presentOnly = false) {
+        try {
+          let url = "/api/barbers";
+          const params = new URLSearchParams();
+          
+          if (selectedDate) {
+            params.append("date", selectedDate);
+          }
+          if (presentOnly) {
+            params.append("present_only", "true");
+          }
+          
+          if (params.toString()) {
+            url += "?" + params.toString();
+          }
+
+          console.log("Loading barbers from:", url); // Debug log
+
+          const res = await fetch(url);
+          const data = await res.json();
+          
+          console.log("Barbers response:", data); // Debug log
+          
+          const barberList = document.getElementById("barber-list");
+          barberList.innerHTML = "";
+
+          if (!data.success) {
+            barberList.innerHTML = "<div class='no-barbers'>Failed to load barbers.</div>";
+            return;
+          }
+
+          // Filter out absent barbers on the client side as well (extra safety)
+          const availableBarbers = presentOnly 
+            ? data.barbers.filter(barber => barber.is_present === 1)
+            : data.barbers;
+
+          if (availableBarbers.length === 0) {
+            barberList.innerHTML =
+              "<div class='no-barbers'>No barbers available" + 
+              (selectedDate ? " for the selected date." : ".") + "</div>";
+            return;
+          }
+
+          availableBarbers.forEach((barber) => {
+            const div = document.createElement("div");
+            div.className = "barber-card";
+            div.innerHTML = `
+              <img src="${barber.profile_pic || "default-profile.svg"}" alt="${
+              barber.name
+            }" class="barber-image">
+              <span class="barber-name">${barber.name}</span>
+            `;
+            div.dataset.id = barber.id;
+            div.onclick = () => selectBarber(barber.id, div);
+            barberList.appendChild(div);
+          });
+        } catch (err) {
+          console.error("Load barbers error:", err);
+          showModal("Failed to load barbers.");
+        }
+      }
+
+      let selectedBarberId = null;
+      let selectedTimeId = null;
+      let selectedDate = null;
+
+      // Set minimum date to today and default value
+      const today = new Date().toISOString().split("T")[0];
+      const bookingDateInput = document.getElementById("booking-date");
+      bookingDateInput.min = today;
+      bookingDateInput.value = today; // Set today as default
+      selectedDate = today; // Set selectedDate to today
+
+      function selectBarber(barberId, element) {
+        selectedBarberId = barberId;
+        selectedTimeId = null;
+        document.querySelectorAll(".barber-card").forEach((card) =>
+          card.classList.remove("selected")
+        );
+        element.classList.add("selected");
+
+        // Reveal date picker and time list when a barber is selected
+  document.getElementById('date-selection').style.display = 'block';
+  document.getElementById('time-list').style.display = 'block';
+  // Also reveal the headings and confirm button that are hidden by default
+  const dateHeading = document.getElementById('date-heading');
+  const timeHeading = document.getElementById('time-heading');
+  const bookBtn = document.getElementById('book-btn');
+  if (dateHeading) dateHeading.style.display = 'block';
+  if (timeHeading) timeHeading.style.display = 'block';
+  if (bookBtn) bookBtn.style.display = 'inline-block';
+
+        const dateInput = document.getElementById("booking-date");
+        // Always ensure a date is set (default is today)
+        if (!dateInput.value) {
+          dateInput.value = selectedDate || new Date().toISOString().split('T')[0];
+          selectedDate = dateInput.value;
+        }
+        // Load available times for the selected barber and date
+        loadAvailableTimes(barberId, dateInput.value);
+      }
+
+      // Date selection handler (FIXED)
+      bookingDateInput.addEventListener("change", function () {
+        selectedDate = this.value;
+        selectedTimeId = null;
+
+        // Clear time selection and refresh list
+        document.querySelectorAll(".time-slot").forEach((slot) =>
+          slot.classList.remove("selected")
+        );
+        document.getElementById("time-list").innerHTML = "";
+
+        // If a barber is already selected, reload available times for that barber
+        if (selectedBarberId) {
+          loadAvailableTimes(selectedBarberId, selectedDate);
+        } else {
+          // If no barber selected, filter barbers for the new date (only show present ones)
+          loadBarbers(selectedDate, true);
+        }
+      });
+
+      // Load available times for a selected barber and date
+      async function loadAvailableTimes(barberId, date) {
+        try {
+          // Add cache-busting parameter to ensure fresh data
+          const timestamp = new Date().getTime();
+          const res = await fetch(
+            `/api/available-times/${barberId}/${date}?t=${timestamp}`
+          );
+          const data = await res.json();
+          const timeList = document.getElementById("time-list");
+          timeList.innerHTML = "";
+          if (data.times.length === 0) {
+            timeList.innerHTML =
+              "<div>No available times for this barber on this date.</div>";
+            return;
+          }
+          data.times.forEach((slot) => {
+            const div = document.createElement("div");
+            div.className = "time-slot";
+            div.textContent = slot.time;
+            div.dataset.id = slot.id;
+            div.onclick = () => selectTime(slot.id, div);
+            timeList.appendChild(div);
+          });
+        } catch (err) {
+          showModal("Failed to load available times.");
+        }
+      }
+
+      function selectTime(timeId, element) {
+        selectedTimeId = timeId;
+        document.querySelectorAll(".time-slot").forEach((slot) =>
+          slot.classList.remove("selected")
+        );
+        element.classList.add("selected");
+      }
+
+      // Function to check and display user's booking limit status
+      async function checkBookingLimit() {
+        try {
+          const res = await fetch("/api/user-booking-count");
+          const data = await res.json();
+          
+          if (data.success) {
+            const bookingDisplay = document.getElementById("booking-limit-display");
+            const bookingCountText = document.getElementById("booking-count-text");
+            const warningMessage = document.getElementById("booking-limit-warning");
+            const bookBtn = document.getElementById("book-btn");
+            
+            // Update booking count display
+            bookingCountText.textContent = `Active Bookings: ${data.count}/3`;
+            bookingDisplay.style.display = "block";
+            
+            if (data.count >= 3) {
+              // Disable booking when limit reached (warning text intentionally hidden)
+              bookBtn.disabled = true;
+              bookBtn.textContent = "BOOKING LIMIT REACHED";
+              bookBtn.style.opacity = "0.6";
+              bookBtn.style.cursor = "not-allowed";
+            } else {
+              // Hide warning and enable booking
+              warningMessage.style.display = "none";
+              bookBtn.disabled = false;
+              bookBtn.textContent = "CONFIRM BOOKING";
+              bookBtn.style.opacity = "1";
+              bookBtn.style.cursor = "pointer";
+              
+              // Update booking count color based on how close to limit
+              if (data.count === 2) {
+                bookingCountText.style.color = "#f39c12"; // Orange for 2/3
+              } else if (data.count === 1) {
+                bookingCountText.style.color = "#27ae60"; // Green for 1/3
+              } else {
+                bookingCountText.style.color = "#333"; // Default for 0/3
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Failed to check booking limit:", err);
+        }
+      }
+
+      // Initialize page when DOM is loaded (UPDATED)
+      document.addEventListener("DOMContentLoaded", () => {
+        // Profile picture loading is now handled by ProfileManager
+
+        // Load barbers for today's date with present_only filter
+        loadBarbers(selectedDate, true);
+
+        // Check and display user's booking limit status
+        checkBookingLimit();
+      });
+
+      // Handle initial booking confirmation (UPDATED)
+      document.getElementById("book-btn").addEventListener("click", () => {
+        // Check if button is disabled due to booking limit
+        if (document.getElementById("book-btn").disabled) {
+          showModal("You have reached the maximum limit of 3 active bookings. Please complete or cancel existing bookings before making a new one.");
+          return;
+        }
+
+        if (!selectedBarberId || !selectedTimeId || !selectedDate) {
+          showModal("Please select a barber, date, and time slot.");
+          return;
+        }
+
+        // Show payment section
+        document.getElementById("payment-section").style.display = "block";
+        document.getElementById("book-btn").style.display = "none";
+
+        // Scroll to payment section
+        document.getElementById("payment-section").scrollIntoView({
+          behavior: "smooth",
+        });
+      });
+
+      // Service pricing configuration
+      const servicePrices = {
+        "HAIRCUT": 250,
+        "CUT AND SHAVE": 300
+      };
+
+      // Function to get service price
+      function getServicePrice(serviceName) {
+        const normalizedName = serviceName.toUpperCase();
+        return servicePrices[normalizedName] || 0;
+      }
+
+      // Function to format price display
+      function formatPrice(price) {
+        return `₱${price.toLocaleString()}`;
+      }
+
+      // Function to update price display
+      function updatePriceDisplay(serviceName, paymentMethod) {
+        const price = getServicePrice(serviceName);
+        const formattedPrice = formatPrice(price);
+        
+        if (paymentMethod === 'cash') {
+          // Update cash price display
+          document.getElementById("cash-service-name-display").textContent = serviceName;
+          document.getElementById("cash-service-price-display").textContent = formattedPrice;
+        } else {
+          // Update QR price display
+          document.getElementById("service-name-display").textContent = serviceName;
+          document.getElementById("service-price-display").textContent = formattedPrice;
+        }
+      }
+
+      // Handle payment method selection (UPDATED)
+      document.querySelectorAll('input[name="payment"]').forEach((radio) => {
+        radio.addEventListener("change", async function () {
+          const selectedMethod = this.value;
+          const qrSection = document.getElementById("qr-section");
+          const cashPriceSection = document.getElementById("cash-price-section");
+          const referenceInput = document.getElementById("reference-number");
+          const referenceInstruction = document.getElementById(
+            "reference-instruction"
+          );
+
+          // Get the selected service
+          const service = sessionStorage.getItem("service") || "HAIRCUT";
+
+          // Hide all QR items and sections first
+          document.getElementById("gcash-qr-item").style.display = "none";
+          document.getElementById("paymaya-qr-item").style.display = "none";
+          qrSection.style.display = "none";
+          cashPriceSection.style.display = "none";
+
+          if (selectedMethod === "cash") {
+            // Show cash price section
+            cashPriceSection.style.display = "block";
+            updatePriceDisplay(service, "cash");
+            
+            referenceInput.placeholder = "Enter receipt number or leave blank";
+            referenceInstruction.textContent =
+              "For cash payments, you can enter a receipt number or leave blank";
+            referenceInput.required = false;
+            // Hide reference number input for cash payments
+            const refSection = document.getElementById('reference-section');
+            if (refSection) refSection.style.display = 'none';
+          } else if (selectedMethod === "gcash") {
+            // Show GCash QR code and price
+            qrSection.style.display = "block";
+            document.getElementById("gcash-qr-item").style.display = "block";
+            updatePriceDisplay(service, "gcash");
+            
+            referenceInput.placeholder = "Enter GCash reference number";
+            referenceInstruction.textContent =
+              "Please enter the reference number from your GCash payment";
+            referenceInput.required = true;
+            // Show reference number input for GCash
+            const refSectionG = document.getElementById('reference-section');
+            if (refSectionG) refSectionG.style.display = 'block';
+            await loadGCashQR();
+          } else if (selectedMethod === "paymaya") {
+            // Show PayMaya QR code and price
+            qrSection.style.display = "block";
+            document.getElementById("paymaya-qr-item").style.display = "block";
+            updatePriceDisplay(service, "paymaya");
+            
+            referenceInput.placeholder = "Enter PayMaya reference number";
+            referenceInstruction.textContent =
+              "Please enter the reference number from your PayMaya payment";
+            referenceInput.required = true;
+            // Show reference number input for PayMaya
+            const refSectionP = document.getElementById('reference-section');
+            if (refSectionP) refSectionP.style.display = 'block';
+            await loadPayMayaQR();
+          }
+        });
+      });
+
+      // Load GCash QR code
+      async function loadGCashQR() {
+        try {
+          const res = await fetch("/api/get-payment-qr", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              method: "gcash",
+            }),
+          });
+          const data = await res.json();
+          if (data.success && data.qrCode) {
+            document.getElementById("gcash-qr").src = data.qrCode;
+          } else {
+            console.error("Failed to load GCash QR code:", data.error);
+            // Show placeholder or error message
+            document.getElementById("gcash-qr").src =
+              "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkdDYXNIIFFSIFVucmF2YWlsYWJsZTwvdGV4dD48L3N2Zz4=";
+          }
+        } catch (err) {
+          console.error("Error loading GCash QR code:", err);
+        }
+      }
+
+      // Load PayMaya QR code
+      async function loadPayMayaQR() {
+        try {
+          const res = await fetch("/api/get-payment-qr", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              method: "paymaya",
+            }),
+          });
+          const data = await res.json();
+          if (data.success && data.qrCode) {
+            document.getElementById("paymaya-qr").src = data.qrCode;
+          } else {
+            console.error("Failed to load PayMaya QR code:", data.error);
+            // Show placeholder or error message
+            document.getElementById("paymaya-qr").src =
+              "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlBheU1heWEgUVIgVW5yYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg==";
+          }
+        } catch (err) {
+          console.error("Error loading PayMaya QR code:", err);
+        }
+      }
+
+      // Handle final booking submission
+      document
+        .getElementById("submit-booking")
+        .addEventListener("click", async () => {
+          const selectedPaymentMethod = document.querySelector(
+            'input[name="payment"]:checked'
+          );
+          if (!selectedPaymentMethod) {
+            showModal("Please select a payment method.");
+            return;
+          }
+
+          const referenceNumber = document
+            .getElementById("reference-number")
+            .value.trim();
+
+          // For cash payments, reference number is optional
+          if (selectedPaymentMethod.value !== "cash" && !referenceNumber) {
+            showModal("Please enter your payment reference number.");
+            return;
+          }
+
+          // You may want to get the selected service from session or another source
+          const service = sessionStorage.getItem("service") || "Haircut";
+          try {
+            const res = await fetch("/api/book-service", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                service,
+                barber_id: selectedBarberId,
+                time_id: selectedTimeId,
+                booking_date: selectedDate,
+                reference_number: referenceNumber || null,
+                payment_method: selectedPaymentMethod.value,
+              }),
+            });
+            const data = await res.json();
+            if (data.success) {
+              let message = "Booking submitted! Your booking is pending admin confirmation. You will receive an email once confirmed.";
+              if (data.remainingBookings !== undefined) {
+                message += ` You have ${data.remainingBookings} booking slots remaining.`;
+              }
+              showModal(message);
+              sessionStorage.setItem("bookingId", data.bookingId); // Save booking ID
+
+              // Refresh booking count
+              setTimeout(() => {
+                checkBookingLimit();
+              }, 1000);
+
+              // Redirect after user clicks OK on modal
+              document.getElementById("modal-ok").addEventListener(
+                "click",
+                function () {
+                  window.location.href = "/mybookings";
+                },
+                { once: true }
+              );
+            } else {
+              showModal(data.error || "Booking failed.");
+            }
+          } catch (err) {
+            showModal("Booking failed.");
+          }
+        });
+
+      // Handle cancel booking
+      document
+        .getElementById("cancel-booking")
+        .addEventListener("click", () => {
+          // Hide payment section and show confirm button again
+          document.getElementById("payment-section").style.display = "none";
+          document.getElementById("book-btn").style.display = "block";
+
+          // Clear reference number input
+          document.getElementById("reference-number").value = "";
+        });
+
+      // Refresh available times when user returns to the page
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && selectedBarberId && selectedDate) {
+          // Page became visible, refresh available times
+          loadAvailableTimes(selectedBarberId, selectedDate);
+        }
+      });
+
+      // Also refresh when the page gains focus
+      window.addEventListener("focus", function () {
+        if (selectedBarberId && selectedDate) {
+          loadAvailableTimes(selectedBarberId, selectedDate);
+        }
+      });
+
+      // Load notifications and update notification count
+      function loadNotifications() {
+        fetch('/api/notifications')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              const unreadCount = data.notifications.filter(n => !n.is_read).length;
+              const countElement = document.getElementById('notificationCount');
+              if (countElement) {
+                if (unreadCount > 0) {
+                  countElement.textContent = unreadCount;
+                  countElement.style.display = 'flex';
+                } else {
+                  countElement.style.display = 'none';
+                }
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Failed to load notifications:', err);
+          });
+      }
+      
+      // Load notifications for dropdown
+      function loadDropdownNotifications() {
+        const dropdownContent = document.getElementById('notificationDropdownContent');
+        dropdownContent.innerHTML = '<div class="notification-loading">Loading notifications...</div>';
+        
+        fetch('/api/notifications')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.notifications.length > 0) {
+              dropdownContent.innerHTML = data.notifications
+                .slice(0, 10) // Show latest 10 notifications
+                .map(notif => `
+                  <div class="notification-dropdown-item ${notif.is_read ? '' : 'unread'}" data-id="${notif.id}">
+                    <div class="notification-message">${notif.message}</div>
+                    <div class="notification-date">${new Date(notif.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</div>
+                  </div>
+                `).join('');
+                
+              // Add click listeners to mark individual notifications as read
+              document.querySelectorAll('.notification-dropdown-item.unread').forEach(item => {
+                item.addEventListener('click', function() {
+                  markNotificationAsRead(this.dataset.id);
+                  this.classList.remove('unread');
+                });
+              });
+            } else {
+              dropdownContent.innerHTML = '<div class="no-notifications">No notifications available</div>';
+            }
+          })
+          .catch(err => {
+            console.error('Failed to load dropdown notifications:', err);
+            dropdownContent.innerHTML = '<div class="no-notifications">Failed to load notifications</div>';
+          });
+      }
+      
+      // Mark single notification as read
+      function markNotificationAsRead(notificationId) {
+        fetch('/api/notifications/mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notificationId: parseInt(notificationId) })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Update notification count
+            loadNotifications();
+          }
+        })
+        .catch(err => {
+          console.error('Failed to mark notification as read:', err);
+        });
+      }
+      
+      // Mark all notifications as read
+      function markAllNotificationsAsRead() {
+        fetch('/api/notifications/mark-all-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Remove unread class from all items
+            document.querySelectorAll('.notification-dropdown-item.unread').forEach(item => {
+              item.classList.remove('unread');
+            });
+            // Update notification count
+            loadNotifications();
+          }
+        })
+        .catch(err => {
+          console.error('Failed to mark all notifications as read:', err);
+        });
+      }
+    </script>
+    <script src="logout-confirm.js"></script>
+  </body>
+</html>

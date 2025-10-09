@@ -1,0 +1,1270 @@
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+  color: #fff;
+  background-color: #000;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header Navigation */
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 30px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.nav-logo {
+  height: 45px;
+  width: auto;
+}
+
+.brand-name {
+  font-family: 'Great Vibes', cursive;
+  font-size: 32px;
+  color: #fff;
+  font-weight: 400;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 40px;
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+
+.nav-link:hover {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.nav-link.active {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.15);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 2px;
+  background: #dc2626;
+  border-radius: 2px;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-actions .btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.login-btn {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.login-btn:hover {
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+.signup-btn {
+  background: #dc2626;
+  color: #fff;
+  border: 1px solid #dc2626;
+}
+
+.signup-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+}
+
+/* Main Content */
+.main-content {
+  margin-top: 80px;
+}
+
+/* Hero Section */
+.hero {
+  background: url("barbershop-bg.jpg") no-repeat center center/cover;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+}
+
+.hero-logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.logo-circle {
+  width: 350px;
+  height: 350px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.circular-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+/* Hero Section Styles - Updated for Logo Image */
+.hero-logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.hero-established {
+  font-size: 16px;
+  letter-spacing: 3px;
+  color: #ccc;
+  font-weight: 300;
+}
+
+.social-links {
+  display: flex;
+  gap: 25px;
+}
+
+.social-links a {
+  color: #fff;
+  font-size: 28px;
+  transition: all 0.3s ease;
+  padding: 8px;
+}
+
+.social-links a:hover {
+  color: #dc2626;
+  transform: translateY(-3px);
+}
+
+/* About Section */
+.about-section {
+  padding: 120px 0;
+  background: #000;
+  color: #fff;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 48px;
+  margin-bottom: 80px;
+  color: #dc2626;
+  font-weight: 600;
+  position: relative;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.about-logo {
+  display: flex;
+  justify-content: center;
+}
+
+.about-barbershop-image {
+  width: 100%;
+  max-width: 500px;
+  height: 350px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.about-barbershop-image:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  border-color: #dc2626;
+}
+
+.about-logo-text-top {
+  position: absolute;
+  top: 15px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 400;
+  color: #fff;
+  text-align: center;
+}
+
+.about-logo-text-bottom {
+  position: absolute;
+  bottom: 15px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.about-logo-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.about-logo-icon {
+  display: flex;
+  gap: 15px;
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-logo-icon i {
+  position: relative;
+}
+
+.about-logo-icon .mustache-icon {
+  font-size: 20px;
+  filter: grayscale(1) brightness(10);
+}
+
+.about-logo-suave {
+  font-family: 'Great Vibes', cursive;
+  font-size: 56px;
+  color: #fff;
+  line-height: 0.8;
+  margin-bottom: 4px;
+}
+
+.about-logo-subtitle {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #fff;
+  font-weight: 400;
+}
+
+.about-logo-barbershop {
+  font-size: 18px;
+  font-weight: 700;
+  color: #dc2626;
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+}
+
+.about-text {
+  color: #ccc;
+}
+
+.about-text p {
+  margin-bottom: 25px;
+  font-size: 16px;
+  line-height: 1.8;
+  text-align: justify;
+}
+
+/* Contact Section */
+.contact-section {
+  padding: 120px 0;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.contact-intro {
+  text-align: center;
+  font-size: 18px;
+  color: #ccc;
+  margin-bottom: 60px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-5px);
+}
+
+.contact-item i {
+  font-size: 24px;
+  color: #dc2626;
+  width: 40px;
+  text-align: center;
+}
+
+.contact-info span {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Footer */
+.main-footer {
+  background: rgba(0, 0, 0, 0.95);
+  color: #fff;
+  padding: 40px 0;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 30px;
+  gap: 15px;
+}
+
+.footer-content p {
+  color: #ccc;
+  font-size: 14px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-social a {
+  color: #fff;
+  font-size: 20px;
+  transition: color 0.3s ease;
+}
+
+.footer-social a:hover {
+  color: #dc2626;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.modal-content {
+  position: relative;
+  background: rgba(64, 64, 64, 0.95);
+  border-radius: 12px;
+  padding: 0;
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 25px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h2 {
+  font-size: 20px;
+  color: #fff;
+  margin: 0;
+  font-weight: 500;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #ccc;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s ease;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #fff;
+}
+
+.modal-form {
+  padding: 25px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.form-group select {
+  color: #fff;
+}
+
+.form-group select option {
+  background: #333;
+  color: #fff;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  user-select: none;
+  font-size: 16px;
+}
+
+.toggle-password:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  font-size: 13px;
+}
+
+.remember-me,
+.terms-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+
+.remember-me input,
+.terms-check input {
+  width: auto;
+  margin: 0;
+  accent-color: #dc2626;
+}
+
+.remember-me:hover,
+.terms-check:hover {
+  color: #fff;
+}
+
+.terms-check a,
+#openTerms {
+  color: #cf0c02 !important;
+  text-decoration: underline;
+}
+
+.terms-check a:hover,
+#openTerms:hover {
+  color: #a30a00 !important;
+  text-decoration: underline;
+}
+
+.forgot-link {
+  color: #dc2626;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+  color: #ef4444;
+}
+
+.form-btn {
+  width: 100%;
+  padding: 15px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-btn:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.form-btn:disabled {
+  background: rgba(128, 128, 128, 0.5);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.form-switch {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.form-switch a {
+  color: #dc2626;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.form-switch a:hover {
+  text-decoration: underline;
+  color: #ef4444;
+}
+
+.password-requirements {
+  margin-top: -15px;
+  margin-bottom: 20px;
+}
+
+.password-requirements small {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Password Strength Indicator */
+.password-strength-indicator {
+  margin: 10px 0;
+}
+
+.strength-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 3px;
+}
+
+.strength-fill.weak {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.strength-fill.not-good {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+}
+
+.strength-fill.good {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.strength-fill.strong {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.strength-fill.perfect {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+}
+
+.strength-text {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.strength-text.weak {
+  color: #ef4444;
+}
+
+.strength-text.not-good {
+  color: #dc2626;
+  text-shadow: 0 0 5px rgba(220, 38, 38, 0.3);
+}
+
+.strength-text.good {
+  color: #f59e0b;
+}
+
+.strength-text.strong {
+  color: #10b981;
+}
+
+.strength-text.perfect {
+  color: #22c55e;
+  text-shadow: 0 0 5px rgba(34, 197, 94, 0.3);
+}
+
+/* Password Validation Errors */
+.password-validation-errors {
+  margin: 8px 0;
+}
+
+.password-error-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ef4444;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.password-error-item:last-child {
+  margin-bottom: 0;
+}
+
+.password-error-item i {
+  font-size: 10px;
+}
+
+.terms-content {
+  padding: 25px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.terms-content p {
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.success-content {
+  padding: 25px;
+  text-align: center;
+}
+
+.success-content #successMessage {
+  margin-bottom: 25px;
+  font-size: 16px;
+  color: #fff;
+  line-height: 1.5;
+}
+
+/* Blur effect when modal is open */
+body.modal-open .main-content,
+body.modal-open .main-header,
+body.modal-open .main-footer {
+  filter: blur(4px);
+  transition: filter 0.3s ease;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .logo-circle {
+    width: 320px;
+    height: 320px;
+  }
+  
+  .about-barbershop-image {
+    max-width: 400px;
+    height: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-nav {
+    flex-direction: column;
+    gap: 20px;
+    padding: 15px 20px;
+  }
+
+  .nav-menu {
+    gap: 25px;
+  }
+
+  .main-content {
+    margin-top: 120px;
+  }
+
+  .hero {
+    height: 90vh;
+    padding: 20px;
+  }
+
+  .logo-circle {
+    width: 280px;
+    height: 280px;
+    padding: 15px;
+  }
+
+  .section-title {
+    font-size: 36px;
+    margin-bottom: 60px;
+  }
+
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 50px;
+    text-align: center;
+  }
+
+  .about-logo-circle {
+    width: 250px;
+    height: 250px;
+  }
+
+  .about-barbershop-image {
+    max-width: 350px;
+    height: 250px;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .contact-item {
+    padding: 20px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .modal-header,
+  .modal-form,
+  .terms-content,
+  .success-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .nav-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .main-content {
+    margin-top: 160px;
+  }
+
+  .hero {
+    height: 85vh;
+    padding: 15px;
+  }
+
+  .logo-circle {
+    width: 240px;
+    height: 240px;
+    padding: 10px;
+  }
+
+  .section-title {
+    font-size: 28px;
+    margin-bottom: 40px;
+  }
+
+  .about-section,
+  .contact-section {
+    padding: 80px 0;
+  }
+
+  .about-logo-circle {
+    width: 220px;
+    height: 220px;
+  }
+
+  .about-barbershop-image {
+    max-width: 300px;
+    height: 220px;
+  }
+
+  .about-text p {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .contact-item {
+    padding: 15px;
+    font-size: 14px;
+  }
+
+  .contact-item i {
+    font-size: 20px;
+  }
+
+  .social-links a {
+    font-size: 24px;
+  }
+
+  .modal-content {
+    width: 98%;
+    margin: 5px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .form-btn {
+    padding: 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo-circle {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .about-barbershop-image {
+    max-width: 280px;
+    height: 200px;
+  }
+}
+
+/* Reviews Section */
+.reviews-section {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 80px 0;
+}
+
+.reviews-intro {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #ccc;
+  margin-bottom: 50px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.reviews-stats {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
+}
+
+.overall-rating {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rating-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.rating-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.overall-rating .stars {
+  display: flex;
+  gap: 5px;
+}
+
+.overall-rating .stars i {
+  color: #d4af37;
+  font-size: 1.5rem;
+}
+
+.rating-text {
+  color: #ccc;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.review-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4af37, #f4e4a1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 1.2rem;
+}
+
+.review-info h4 {
+  color: #fff;
+  margin-bottom: 3px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.review-date {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.review-rating {
+  display: flex;
+  gap: 2px;
+}
+
+.review-rating i {
+  color: #d4af37;
+  font-size: 1rem;
+}
+
+.review-rating i.empty {
+  color: #444;
+}
+
+.review-comment {
+  color: #e0e0e0;
+  line-height: 1.6;
+  font-style: italic;
+  margin: 0;
+}
+
+.review-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px 20px;
+  color: #999;
+}
+
+.review-loading i {
+  font-size: 2rem;
+  margin-bottom: 15px;
+  color: #d4af37;
+}
+
+.reviews-actions {
+  text-align: center;
+}
+
+.load-more-btn {
+  background: linear-gradient(135deg, #d4af37, #f4e4a1);
+  color: #1a1a1a;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.load-more-btn:hover {
+  background: linear-gradient(135deg, #f4e4a1, #d4af37);
+  transform: translateY(-2px);
+}
+
+.load-more-btn:disabled {
+  background: #444;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Reviews Responsive Design */
+@media (max-width: 768px) {
+  .reviews-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .review-card {
+    padding: 20px;
+  }
+  
+  .rating-number {
+    font-size: 2.5rem;
+  }
+  
+  .overall-rating {
+    padding: 25px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reviews-section {
+    padding: 60px 0;
+  }
+  
+  .review-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .review-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .reviews-intro {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .hero {
+    background-attachment: scroll;
+  }
+}

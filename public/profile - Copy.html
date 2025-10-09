@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Suave Barbershop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Loader */
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #loader img {
+      width: 200px;
+      animation: zoomIn 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(1); opacity: 0.8; }
+      to { transform: scale(1.15); opacity: 1; }
+    }
+
+    /* Navbar */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      flex-wrap: wrap;
+      background-color: #333;
+      color: white;
+    }
+
+    nav img {
+      height: 100px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+      margin-left: auto;
+    }
+
+    nav ul li a {
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 20px;
+      color: white;
+      text-decoration: none;
+    }
+
+    nav ul li a:hover {
+      text-decoration: underline;
+    }
+
+    .brand-name {
+      font-family: 'Great Vibes', cursive;
+      font-size: 48px;
+      font-weight: bold;
+      margin-left: 15px;
+      color: white;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+    }
+
+    .profile {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-left: 40px;
+      border: 2px solid white;
+    }
+
+    .profile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Profile Content */
+    .profile-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .profile-card {
+      background: #1a1a1a;
+      padding: 40px;
+      border-radius: 15px;
+      width: 400px;
+      box-shadow: 0px 4px 15px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    .profile-card img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid white;
+      object-fit: cover;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .profile-card img:hover {
+      transform: scale(1.05);
+    }
+
+    .profile-card h2 {
+      margin: 10px 0;
+      font-size: 28px;
+    }
+
+    .profile-info {
+      text-align: left;
+      margin-top: 20px;
+    }
+
+    .profile-info p {
+      background: #2c2c2c;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .edit-btn {
+      background: #cf0c02;
+      border: none;
+      color: white;
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .edit-btn:hover {
+      background: #a30901;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    /* Hide file input */
+    #profile-pic-input {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loader">
+    <img src="suavelogo.png" alt="Loading...">
+  </div>
+
+  <!-- Navbar -->
+  <nav>
+    <a href="homepage.html"><img src="suavelogo.png" alt="Suave Logo"></a>
+    <h1 class="brand-name">Suave Barbershop</h1>
+    <ul>
+      <li><a href="homepage.html">HOME</a></li>
+      <li><a href="about.html">ABOUT US</a></li>
+    </ul>
+    <div class="profile">
+      <img src="carlo.png" alt="Profile">
+    </div>
+  </nav>
+
+  <!-- Profile Content -->
+  <div class="profile-container" id="profile-content" style="display:none;">
+    <div class="profile-card">
+      <label for="profile-pic-input">
+        <img id="profile-pic" src="carlo.png" alt="Profile Picture">
+      </label>
+      <input type="file" id="profile-pic-input" accept="image/*">
+
+      <!-- Editable Name -->
+      <h2 id="profile-name">
+        Carlo Cruz
+        <button class="edit-btn" style="margin-left: 10px;" onclick="editField('profileName')">Edit</button>
+      </h2>
+
+      <div class="profile-info">
+        <p><span>Username:</span> <span id="username">carlocruz</span> 
+          <button class="edit-btn" onclick="editField('username')">Edit</button>
+        </p>
+        <p><span>Email:</span> <span id="email">carlo@example.com</span>
+          <button class="edit-btn" onclick="editField('email')">Edit</button>
+        </p>
+        <p><span>Password:</span> <span id="password">********</span>
+          <button class="edit-btn" onclick="editField('password')">Edit</button>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 Suave Barbershop. All rights reserved.
+  </footer>
+
+  <script>
+    // Loader effect
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("profile-content").style.display = "flex";
+        loadProfileData();
+      }, 2500);
+    });
+
+    // Load profile data from localStorage
+    function loadProfileData() {
+      const storedName = localStorage.getItem("profileName");
+      const storedUsername = localStorage.getItem("username");
+      const storedEmail = localStorage.getItem("email");
+      const storedPassword = localStorage.getItem("password");
+      const storedPic = localStorage.getItem("profilePic");
+
+      if (storedName) {
+        const nameHeading = document.getElementById("profile-name");
+        nameHeading.childNodes[0].nodeValue = storedName + " ";
+      }
+      if (storedUsername) document.getElementById("username").innerText = storedUsername;
+      if (storedEmail) document.getElementById("email").innerText = storedEmail;
+      if (storedPassword) document.getElementById("password").innerText = "********";
+      if (storedPic) document.getElementById("profile-pic").src = storedPic;
+    }
+
+    // Save profile data to localStorage
+    function saveProfileData(field, value) {
+      localStorage.setItem(field, value);
+    }
+
+    // Edit field
+    function editField(field) {
+      let currentValue;
+
+      if (field === "profileName") {
+        currentValue = localStorage.getItem(field) || document.getElementById("profile-name").childNodes[0].nodeValue.trim();
+      } else {
+        currentValue = localStorage.getItem(field) || document.getElementById(field).innerText;
+      }
+
+      const newValue = prompt("Enter new " + field + ":", currentValue);
+      if (newValue !== null && newValue.trim() !== "") {
+        if (field === "profileName") {
+          document.getElementById("profile-name").childNodes[0].nodeValue = newValue + " ";
+        } else {
+          document.getElementById(field).innerText = (field === "password") ? "********" : newValue;
+        }
+        saveProfileData(field, newValue);
+        alert(field.charAt(0).toUpperCase() + field.slice(1) + " updated!");
+      }
+    }
+
+    // Profile picture change
+    document.getElementById("profile-pic-input").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imageData = e.target.result;
+          document.getElementById("profile-pic").src = imageData;
+          saveProfileData("profilePic", imageData);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+
+</body>
+</html>

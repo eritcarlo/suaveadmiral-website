@@ -1,0 +1,397 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+  text-align: center;
+}
+
+/* LOADING SCREEN */
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+#loading-screen img {
+  width: 200px;
+  animation: zoomIn 1.5s ease-in-out infinite alternate;
+}
+@keyframes zoomIn {
+  0% { transform: scale(0.8); opacity: 0.7; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: #2e2e2e;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  flex-wrap: wrap;
+}
+nav img {
+  height: 120px;
+  cursor: pointer;
+}
+nav h1.brand-name {
+  font-family: 'Great Vibes', cursive;
+  font-size: 62px;
+  font-weight: bold;
+  margin-left: 15px;
+  color: white;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+}
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+}
+nav ul li {
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 28px;
+}
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+nav ul li a:hover {
+  color: #cf0c02;
+}
+.profile-dropdown {
+  position: relative;
+  margin-left: 40px;
+}
+.profile {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 80px;
+  right: 0;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  min-width: 180px;
+  z-index: 100;
+  flex-direction: column;
+  padding: 10px 0;
+}
+.dropdown-menu.show {
+  display: flex;
+}
+.dropdown-menu a {
+  color: #222;
+  text-decoration: none;
+  padding: 12px 24px;
+  font-size: 18px;
+  transition: background 0.2s;
+}
+.dropdown-menu a:hover {
+  background: rgba(207, 12, 2, 0.8);
+  color: #ffffff;
+}
+
+/* Section Title */
+h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 30px;
+  margin-top: 80px;
+  color: #cf0c02;
+  letter-spacing: 2px;
+}
+
+/* Payment Methods */
+.payment-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 40px 20px;
+  flex-wrap: wrap;
+}
+.payment-box {
+  background: #e6e6e6;
+  border-radius: 15px;
+  width: 250px;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s, background 0.3s;
+}
+.payment-box:hover {
+  transform: scale(1.05);
+  background: #cf0c02;
+  color: white;
+}
+.payment-box.selected {
+  background: #cf0c02;
+  color: white;
+  transform: scale(1.05);
+}
+.payment-box img,
+.payment-box i {
+  font-size: 120px;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin-bottom: 15px;
+}
+.payment-box p {
+  font-weight: bold;
+  font-size: 28px;
+  margin: 0;
+}
+
+/* Book Button */
+.book-btn {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 12px 40px;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  margin: 0 auto 40px;
+  transition: 0.3s;
+  max-width: 200px;
+  font-size: 20px;
+}
+.book-btn:hover {
+  background: #cf0c02;
+}
+
+/* Footer */
+footer {
+  background-color: #2e2e2e;
+  color: #fff;
+  padding: 15px 0;
+  text-align: center;
+  font-size: 16px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .payment-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .payment-box {
+    width: 80%;
+    max-width: 280px;
+  }
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px 10px;
+  }
+  nav h1.brand-name {
+    font-size: 38px;
+    margin-left: 0;
+    margin-top: 10px;
+  }
+  nav ul {
+    gap: 10px;
+    font-size: 18px;
+  }
+  .profile-dropdown {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+}
+
+/* ====== ENHANCED MOBILE RESPONSIVE DESIGN ====== */
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  body {
+    padding-top: 80px;
+  }
+  
+  nav {
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 10px;
+    gap: 12px;
+  }
+  
+  nav img {
+    height: 45px;
+    margin-right: 8px;
+  }
+  
+  nav h1.brand-name {
+    font-size: 32px;
+    margin-left: 0;
+    margin-top: 8px;
+    text-align: center;
+  }
+  
+  nav ul {
+    gap: 8px;
+    font-size: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  nav ul li a {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .profile-dropdown {
+    margin: 8px 0 0 0;
+  }
+  
+  .payment-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    gap: 20px;
+  }
+  
+  .payment-box {
+    width: 95%;
+    max-width: 320px;
+    padding: 25px 18px;
+    margin: 10px 0;
+  }
+  
+  .payment-box h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .payment-box p {
+    font-size: 14px;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  
+  .payment-box button {
+    width: 100%;
+    padding: 18px;
+    font-size: 16px;
+    margin: 10px 0;
+    border-radius: 8px;
+  }
+  
+  .qr-container {
+    text-align: center;
+    margin: 15px 0;
+  }
+  
+  .qr-container img {
+    max-width: 150px;
+    height: auto;
+  }
+  
+  /* Form elements responsive */
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    margin: 8px 0;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 320px) {
+  body {
+    padding-top: 70px;
+  }
+  
+  nav {
+    padding: 10px 8px;
+  }
+  
+  nav h1.brand-name {
+    font-size: 28px;
+  }
+  
+  nav ul {
+    gap: 6px;
+    font-size: 14px;
+  }
+  
+  nav ul li a {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .payment-container {
+    padding: 15px 8px;
+  }
+  
+  .payment-box {
+    width: 98%;
+    max-width: 290px;
+    padding: 20px 15px;
+  }
+  
+  .payment-box h2 {
+    font-size: 1.3rem;
+  }
+  
+  .payment-box p {
+    font-size: 13px;
+  }
+  
+  .payment-box button {
+    padding: 16px;
+    font-size: 15px;
+  }
+  
+  .qr-container img {
+    max-width: 130px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea {
+    padding: 12px;
+    font-size: 15px;
+  }
+}

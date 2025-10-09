@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Confirmation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loader img {
+      width: 200px;
+      animation: zoomIn 2s ease-in-out infinite alternate;
+    }
+    @keyframes zoomIn {
+      from { transform: scale(1); opacity: 0.8; }
+      to { transform: scale(1.15); opacity: 1; }
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      flex-wrap: wrap;
+      background-color: #333;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    nav img {
+      height: 100px;
+      cursor: pointer;
+    }
+    nav h1.brand-name {
+      font-family: 'Great Vibes', cursive;
+      font-size: 48px;
+      font-weight: bold;
+      margin-left: 15px;
+      color: white;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+      margin-left: auto;
+    }
+    nav ul li {
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    nav ul li a:hover {
+      color: #cf0c02;
+      text-decoration: underline;
+    }
+    .profile-dropdown {
+      position: relative;
+      margin-left: 40px;
+    }
+    .profile {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 80px;
+      right: 0;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      min-width: 180px;
+      z-index: 100;
+      flex-direction: column;
+      padding: 10px 0;
+    }
+    .dropdown-menu.show {
+      display: flex;
+    }
+    .dropdown-menu a {
+      color: #222;
+      text-decoration: none;
+      padding: 12px 24px;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+    .dropdown-menu a:hover {
+      background: #f5f5f5;
+      color: #cf0c02;
+    }
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .logo {
+      width: 150px;
+      margin-bottom: 20px;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    h1 {
+      font-size: 40px;
+      margin-bottom: 10px;
+      color: #cf0c02;
+    }
+    p {
+      font-size: 18px;
+      max-width: 400px;
+      margin-bottom: 30px;
+    }
+    .button-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .home-btn {
+      background: #cf0c02;
+      color: #fff;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .home-btn:hover {
+      background: #a30a00;
+    }
+    footer {
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loader">
+    <img src="suavelogo.png" alt="Loading...">
+  </div>
+
+  <!-- Navbar (functional like homepage) -->
+  <nav>
+    <img src="suavelogo.png" alt="Suave Logo">
+    <h1 class="brand-name">Suave Barbershop</h1>
+    <ul>
+      <li><a href="/home" class="nav-link">HOME</a></li>
+      <li><a href="/about" class="nav-link">ABOUT US</a></li>
+      <li><a href="/mybookings" class="nav-link active">MY BOOKINGS</a></li>
+    </ul>
+    <div class="profile-dropdown">
+      <div class="profile" id="profileBtn">
+        <img id="navbar-profile-pic" src="default-profile.svg" alt="Profile">
+      </div>
+      <div class="dropdown-menu" id="dropdownMenu">
+        <a href="/profile">Profile</a>
+        <a href="/changepass">Change Password</a>
+        <a href="javascript:void(0)" id="logoutBtn">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Confirmation Message -->
+  <div class="container" id="confirmation-content" style="display:none;">
+    <img src="suavelogo.png" alt="Suave Logo" class="logo">
+    <h1>Booking Successful!</h1>
+    <p>Thank you for booking with Suave Barbershop.<br>
+    Your appointment is being processed. Kindly check your email for confirmation details.</p>
+    <div class="button-row">
+      <button class="home-btn" id="returnHome">Return to Home</button>
+      <button class="home-btn" id="viewBookings">View My Bookings</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 Suave Barbershop. All rights reserved.
+  </footer>
+
+  <script src="logout-confirm.js"></script>
+  <script>
+    // Loader and confirmation content
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("confirmation-content").style.display = "flex";
+      }, 2500);
+    });
+
+    // Navigation loader effect
+    function addLoaderEffect(selector) {
+      document.querySelectorAll(selector).forEach(link => {
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+          const loader = document.getElementById("loader");
+          loader.style.display = "flex";
+          setTimeout(() => {
+            window.location.href = this.href;
+          }, 800);
+        });
+      });
+    }
+    addLoaderEffect(".nav-link");
+
+    // ========= Profile Dropdown =========
+    const profileBtn = document.getElementById("profileBtn");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    profileBtn.addEventListener("click", () => {
+      dropdownMenu.classList.toggle("show");
+    });
+    window.addEventListener("click", (e) => {
+      if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        dropdownMenu.classList.remove("show");
+      }
+    });
+
+    // Logout is handled by logout-confirm.js (confirmation modal)
+
+    // Load profile picture from localStorage (or fetch from backend if available)
+    window.addEventListener("DOMContentLoaded", () => {
+      const storedPic = localStorage.getItem("profilePic");
+      const navbarPic = document.getElementById("navbar-profile-pic");
+      if (storedPic && navbarPic) {
+        navbarPic.src = storedPic;
+      }
+      // Optionally, fetch from backend if not in localStorage
+      // fetch("/api/get-profile-pic").then(res => res.json()).then(data => {
+      //   if (data.profilePic && navbarPic) navbarPic.src = data.profilePic;
+      // });
+    });
+
+    // Return to Home and View My Bookings buttons
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("returnHome").addEventListener("click", () => {
+        document.getElementById("loader").style.display = "flex";
+        document.getElementById("confirmation-content").style.display = "none";
+        setTimeout(() => {
+          window.location.href = "/home";
+        }, 2000);
+      });
+      document.getElementById("viewBookings").addEventListener("click", () => {
+        document.getElementById("loader").style.display = "flex";
+        document.getElementById("confirmation-content").style.display = "none";
+        setTimeout(() => {
+          window.location.href = "/mybookings";
+        }, 2000);
+      });
+    });
+  </script>
+
+</body>
+</html>

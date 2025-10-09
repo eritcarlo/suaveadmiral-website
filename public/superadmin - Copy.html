@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Super Admin Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="dashboard">
+    <h1>🌟 Super Admin Dashboard</h1>
+    <p id="welcome"></p>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <script>
+    // Fetch superadmin welcome message
+    async function fetchSuperAdminData() {
+      try {
+        const res = await fetch("/api/superadmin-dashboard");
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById("welcome").textContent = data.message;
+        } else {
+          window.location.href = "/login.html"; // Not authorized
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        window.location.href = "/login.html";
+      }
+    }
+
+    // Logout: handled by centralized logout-confirm.js
+    // logout-confirm.js intercepts clicks on #logoutBtn and shows confirmation modal
+
+    fetchSuperAdminData();
+  </script>
+  <script src="logout-confirm.js"></script>
+</body>
+</html>

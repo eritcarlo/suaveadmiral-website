@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Barbershop Sign Up</title>
+  <link rel="stylesheet" href="/signup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="left-side"></div>
+    <div class="right-side">
+      <div class="login-box">
+        <form id="registerForm">
+          <input type="email" id="email" placeholder="E-mail" required>
+
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="Password" required minlength="8" maxlength="16">
+            <span class="toggle-password">👁️</span>
+          </div>
+          <div class="password-requirements">
+            <small>Password must be 8-16 characters and contain at least 1 number or special character</small>
+          </div>
+
+          <div class="password-wrapper">
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+            <span class="toggle-password">👁️</span>
+          </div>
+
+          <!-- Role hidden (always USER when signing up from here) -->
+          <input type="hidden" id="role" value="USER">
+
+          <label class="terms">
+            <input type="checkbox" id="termsCheckbox" disabled>
+            I agree to the <a href="#" id="openTerms">Terms and Conditions</a>
+          </label>
+
+          <button type="submit" id="registerBtn" disabled>REGISTER</button>
+
+          <p class="signup-text">
+            Already have an account? <a href="/login">Login</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms Modal -->
+  <div id="termsModal" class="modal" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:#fff; padding:20px; max-width:600px; width:90%;">
+      <span class="close" id="closeTerms" style="cursor:pointer; float:right;">&times;</span>
+      <h2>Terms and Conditions</h2>
+      <p>Welcome to our barbershop system! Please read carefully before continuing:</p>
+      <p>1. You must provide accurate and truthful information during registration.</p>
+      <p>2. Your account is personal; do not share your login credentials.</p>
+      <p>3. By booking appointments, you agree to follow our shop policies.</p>
+      <p>4. Any misuse of the platform may result in account suspension.</p>
+      <p>5. We may update these terms at any time; continued use means you accept the changes.</p>
+    </div>
+  </div>
+
+  <script>
+    // Toggle password visibility
+    document.querySelectorAll(".toggle-password").forEach(toggle => {
+      toggle.addEventListener("click", () => {
+        const input = toggle.previousElementSibling;
+        if (input.type === "password") {
+          input.type = "text";
+          toggle.textContent = "🙈";
+        } else {
+          input.type = "password";
+          toggle.textContent = "👁️";
+        }
+      });
+    });
+
+    // Terms modal logic
+    const modal = document.getElementById("termsModal");
+    const openBtn = document.getElementById("openTerms");
+    const closeBtn = document.getElementById("closeTerms");
+    const checkbox = document.getElementById("termsCheckbox");
+    const registerBtn = document.getElementById("registerBtn");
+    let hasReadTerms = false;
+
+    openBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      modal.style.display = "flex";
+    });
+
+    function enableCheckbox() {
+      hasReadTerms = true;
+      checkbox.disabled = false;
+      updateRegisterBtn();
+    }
+
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+      enableCheckbox();
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        enableCheckbox();
+      }
+    });
+
+    checkbox.addEventListener("change", updateRegisterBtn);
+
+    function updateRegisterBtn() {
+      registerBtn.disabled = !(checkbox.checked && hasReadTerms);
+    }
+
+    // Signup form submit
+    document.getElementById("registerForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      const role = document.getElementById("role").value;
+
+      // Password validation
+      if (password.length < 8 || password.length > 16) {
+        alert("❌ Password must be between 8 and 16 characters!");
+        return;
+      }
+
+      // Check for at least 1 number or special character
+      const hasNumberOrSpecial = /[0-9!@#$%^&*(),.?":{}|<>]/.test(password);
+      if (!hasNumberOrSpecial) {
+        alert("❌ Password must contain at least 1 number or special character!");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert("❌ Passwords do not match!");
+        return;
+      }
+
+      if (!checkbox.checked) {
+        alert("❌ You must agree to the Terms and Conditions");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, role })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert("✅ " + data.message);
+          // Redirect to login page after registration
+          setTimeout(() => { window.location.href = "/login"; }, 700);
+        } else {
+          alert("❌ " + data.error);
+        }
+      } catch (err) {
+        alert("⚠️ Network error: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

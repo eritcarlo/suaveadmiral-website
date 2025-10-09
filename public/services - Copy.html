@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suave Barbershop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Montserrat:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding-bottom: 120px;
+      background-color: #fff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Loading Screen */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #loading-screen img {
+      width: 150px;
+      height: 150px;
+      animation: zoomIn 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes zoomIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0.6;
+      }
+      to {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+    }
+
+    /* Navbar */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      flex-wrap: wrap;
+      background: #2c2c2c;
+      color: white;
+    }
+
+    nav img {
+      height: 100px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+      margin-left: auto;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 28px;
+      transition: color 0.3s;
+    }
+
+    nav ul li a:hover {
+      color: #cf0c02;
+    }
+
+    nav .profile {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-left: 30px;
+      border: 2px solid white;
+    }
+
+    nav .profile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .brand-name {
+      font-family: 'Great Vibes', cursive;
+      font-size: 50px;
+      font-weight: bold;
+      margin-left: 15px;
+      color: white;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+    }
+
+    /* Section Title */
+    h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 35px;
+      margin-top: 70px;
+    }
+
+    /* Service Boxes */
+    .payment-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 40px 20px 80px;
+      flex-wrap: wrap;
+    }
+
+    .payment-box {
+      background: #e6e6e6;
+      padding: 40px;
+      border-radius: 15px;
+      width: 180px;
+      text-align: center;
+      transition: transform 0.3s, background 0.3s;
+      flex: 1 1 200px;
+      max-width: 300px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      cursor: pointer;
+    }
+
+    .payment-box:hover {
+      transform: scale(1.05);
+      background: #cf0c02;
+      color: white;
+    }
+
+    .payment-box i {
+      font-size: 120px;
+      color: #333;
+      margin-bottom: 20px;
+      transition: color 0.3s;
+    }
+
+    .payment-box p {
+      font-weight: bold;
+      font-size: 24px;
+      color: #333;
+      transition: color 0.3s;
+    }
+
+    /* Selected state */
+    .payment-box.selected {
+      background: #cf0c02 !important;
+      color: white !important;
+    }
+
+    .payment-box.selected p,
+    .payment-box.selected i {
+      color: white !important;
+    }
+
+    /* Book Button */
+    .book-btn {
+      display: inline-block;
+      background: #000;
+      color: #fff;
+      padding: 12px 40px;
+      font-weight: bold;
+      border-radius: 25px;
+      text-decoration: none;
+      margin: 0 auto 50px;
+      transition: background 0.3s;
+      max-width: 200px;
+    }
+
+    .book-btn:hover {
+      background: #cf0c02;
+    }
+
+    /* Footer */
+    footer {
+      background: #2c2c2c;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        gap: 15px;
+      }
+      nav ul {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .payment-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .payment-box {
+        width: 100%;
+        max-width: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <img src="suavelogo.png" alt="Loading Logo">
+</div>
+
+<!-- Navbar -->
+<nav>
+  <a href="homepage.html" class="nav-link"><img src="suavelogo.png" alt="Suave Logo"></a>
+  <h1 class="brand-name">Suave Barbershop</h1>
+  <ul>
+    <li><a href="homepage.html" class="nav-link">HOME</a></li>
+    <li><a href="about.html" class="nav-link">ABOUT US</a></li>
+  </ul>
+  <div class="profile">
+    <img src="carlo.png" alt="Profile">
+  </div>
+</nav>
+
+<!-- Title -->
+<h2> SELECT SERVICES </h2>
+
+<!-- Services -->
+<div class="payment-container">
+  <div class="payment-box service-link">
+    <i class="fa-solid fa-scissors"></i>
+    <p>HAIRCUT</p>
+  </div>
+
+  <div class="payment-box service-link">
+    <i class="fa-solid fa-scissors"></i>
+    <p>CUT AND SHAVE</p>
+  </div>
+</div>
+
+<!-- Book Button -->
+<a href="barber.html" class="book-btn service-link">BOOK</a>
+
+<!-- Footer -->
+<footer>
+  &copy; 2025 Suave Barbershop | All Rights Reserved
+</footer>
+
+<script>
+  // Remove loading screen after page load
+  window.addEventListener("load", () => {
+    const loadingScreen = document.getElementById("loading-screen");
+    setTimeout(() => {
+      loadingScreen.style.display = "none";
+    }, 1000);
+  });
+
+  // Handle service selection (no redirect)
+  const serviceBoxes = document.querySelectorAll(".payment-box");
+
+  serviceBoxes.forEach(box => {
+    box.addEventListener("click", function () {
+      serviceBoxes.forEach(b => b.classList.remove("selected"));
+      this.classList.add("selected");
+    });
+  });
+
+  // Navbar & Book Button loading animation
+  document.querySelectorAll(".nav-link, .book-btn").forEach(link => {
+    link.addEventListener("click", function (event) {
+      event.preventDefault();
+      const loadingScreen = document.getElementById("loading-screen");
+      loadingScreen.style.display = "flex";
+      setTimeout(() => {
+        window.location.href = this.href;
+      }, 2500);
+    });
+  });
+</script>
+
+</body>
+</html>
+

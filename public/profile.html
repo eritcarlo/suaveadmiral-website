@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile - Suave Barbershop</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="profile.css" />
+    <script src="profile-manager.js"></script>
+  </head>
+  <body>
+    <!-- Loader -->
+    <div id="loader">
+      <img src="suavelogo.png" alt="Loading..." />
+    </div>
+
+    <!-- Navbar (functional like homepage) -->
+    <nav>
+      <img src="suavelogo.png" alt="Suave Logo" />
+      <h1 class="brand-name">Suave Barbershop</h1>
+      <ul>
+        <li><a href="/home" class="nav-link">HOME</a></li>
+        <li><a href="javascript:void(0)" id="navBookNowBtn" data-no-loader>BOOK NOW</a></li>
+        <li><a href="/mybookings" class="nav-link">MY BOOKINGS</a></li>
+      </ul>
+
+      <!-- Notifications -->
+      <div class="notification-bell" id="notificationBell">
+        <i class="fas fa-bell"></i>
+        <span id="notificationCount" class="notification-count" style="display: none;">0</span>
+        
+        <!-- Notification Dropdown -->
+        <div class="notification-dropdown" id="notificationDropdown">
+          <div class="notification-dropdown-header">
+            <h4>Notifications</h4>
+            <button class="mark-all-read" id="markAllReadBtn" title="Mark all as read">
+              <i class="fas fa-check-double"></i>
+            </button>
+          </div>
+          <div class="notification-dropdown-content" id="notificationDropdownContent">
+            <div class="notification-loading">Loading notifications...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-dropdown">
+        <div class="profile" id="profileBtn">
+          <img id="navbar-profile-pic" src="default-profile.svg" alt="Profile" />
+        </div>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="/profile">Profile</a>
+          <a href="/forgot">Change Password</a>
+          <a href="javascript:void(0)" id="logoutBtn">Logout</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="page-wrapper">
+      <!-- Profile Content -->
+      <div class="profile-container" id="profile-content" style="display: none;">
+        <div class="profile-content-flex">
+          <!-- Profile left panel -->
+          <div class="profile-left" style="background: #1a1a1a; border-radius: 15px; box-shadow: 0px 4px 15px rgba(0,0,0,0.6); padding: 40px 30px; min-width: 260px; display: flex; flex-direction: column; align-items: center;">
+            <img id="profile-pic" src="default-profile.svg" alt="Profile Picture" data-profile-upload style="width:120px;height:120px;border-radius:50%;border:3px solid white;object-fit:cover;margin-bottom:15px;cursor:pointer;" />
+            <input type="file" id="profile-pic-input" accept="image/*" style="display: none;" />
+            <div style="margin-top:10px;text-align:center;">
+              <div style="font-size:1.2rem;font-weight:600;"> <span id="fullName">Loading...</span> </div>
+              <div style="font-size:1rem;color:#888;word-break:break-all;"> <span id="email">Loading...</span> </div>
+            </div>
+          </div>
+          <!-- Profile main panel -->
+          <div class="profile-main" style="flex:1;display:flex;flex-direction:column;gap:30px;">
+            <form class="profile-info" style="display:grid;grid-template-columns:1fr 1fr;gap:30px 40px;margin-top:0;align-items:center;">
+              <div class="password-card">
+                <label style="color:#fff;font-weight:600;margin-bottom:6px;">Password</label>
+                <span class="masked-password">********</span>
+                <div class="change-row">
+                  <a href="/forgot" class="edit-btn">Change</a>
+                </div>
+              </div>
+              <div style="background:#2c2c2c;padding:18px 20px;border-radius:10px;">
+                <label for="gender" style="color:#fff;font-weight:600;">Gender</label><br>
+                <select id="gender" style="background:#222;color:white;border-radius:5px;padding:8px;width:100%;margin-top:8px;">
+                  <option value="">Select</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div style="background:#2c2c2c;padding:18px 20px;border-radius:10px;">
+                <label for="age" style="color:#fff;font-weight:600;">Age</label><br>
+                <input type="number" id="age" min="1" max="120" style="background:#222;color:white;border-radius:5px;padding:8px;width:100%;margin-top:8px;" />
+              </div>
+              <div style="background:#2c2c2c;padding:18px 20px;border-radius:10px;">
+                <label for="birthday" style="color:#fff;font-weight:600;">Birthday</label><br>
+                <input type="date" id="birthday" style="background:#222;color:white;border-radius:5px;padding:8px;width:100%;margin-top:8px;" />
+              </div>
+            </form>
+            <div style="display:flex;justify-content:flex-end;width:100%;margin-top:10px;">
+              <button id="saveProfileBtn" class="edit-btn" style="min-width:140px;">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>© Marco Lorenzo Reyes, Rasheed Kenian Saladino, Angelo Fronda and John Carlo Erit</footer>
+
+    <!-- Services Modal -->
+    <div id="services-modal" class="services-modal" style="display:none;">
+      <div class="services-modal-content">
+        <button class="close-services-modal" aria-label="Close">×</button>
+        <h2 class="services-title">SELECT SERVICES</h2>
+        <div class="services-container">
+          <div class="service-box" data-service="HAIRCUT" data-price="250">
+            <i class="fa-solid fa-scissors"></i>
+            <p>HAIRCUT</p>
+            <div class="service-price">₱250</div>
+          </div>
+          <div class="service-box" data-service="CUT AND SHAVE" data-price="300">
+            <i class="fa-solid fa-scissors"></i>
+            <p>CUT AND SHAVE</p>
+            <div class="service-price">₱300</div>
+          </div>
+        </div>
+        <div class="service-loading" style="display:none;">
+          <img src="suavelogo.png" alt="Loading...">
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Loader effect
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("profile-content").style.display = "flex";
+          loadProfileData();
+        }, 1500);
+      });
+
+      // Navigation loader effect
+      function addLoaderEffect(selector) {
+        document.querySelectorAll(selector).forEach((link) => {
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+            const loader = document.getElementById("loader");
+            loader.style.display = "flex";
+            setTimeout(() => {
+              window.location.href = this.href;
+            }, 800);
+          });
+        });
+      }
+      addLoaderEffect(".nav-link");
+
+      // ========= Profile Dropdown =========
+      const profileBtn = document.getElementById("profileBtn");
+      const dropdownMenu = document.getElementById("dropdownMenu");
+      profileBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle("show");
+      });
+      window.addEventListener("click", (e) => {
+        if (
+          !profileBtn.contains(e.target) &&
+          !dropdownMenu.contains(e.target)
+        ) {
+          dropdownMenu.classList.remove("show");
+        }
+      });
+
+      // ========= Notification Bell =========
+      const notificationBell = document.getElementById('notificationBell');
+      const notificationDropdown = document.getElementById('notificationDropdown');
+      
+      if (notificationBell) {
+        notificationBell.addEventListener('click', function(e) {
+          e.stopPropagation();
+          notificationDropdown.classList.toggle('show');
+          
+          // Load notifications when dropdown is opened
+          if (notificationDropdown.classList.contains('show')) {
+            loadDropdownNotifications();
+          }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!notificationBell.contains(e.target)) {
+            notificationDropdown.classList.remove('show');
+          }
+        });
+      }
+      
+      // Mark all notifications as read
+      const markAllReadBtn = document.getElementById('markAllReadBtn');
+      if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          markAllNotificationsAsRead();
+        });
+      }
+
+      // ========= Logout =========
+      // Handled by centralized logout-confirm.js
+      // logout-confirm.js intercepts clicks on #logoutBtn and shows confirmation modal
+
+      // Load profile data from backend
+      async function loadProfileData() {
+        try {
+          // Get user session info
+          const userRes = await fetch("/api/user-info");
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            if (userData.success) {
+              document.getElementById("fullName").innerText = userData.user.full_name || "Not set";
+              document.getElementById("email").innerText = userData.user.email || "Not set";
+              document.getElementById("gender").value = userData.user.gender || "";
+              document.getElementById("age").value = userData.user.age || "";
+              document.getElementById("birthday").value = userData.user.birthday ? userData.user.birthday.split('T')[0] : "";
+              // Profile picture will be handled by ProfileManager
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load profile data:", err);
+        }
+      }
+          
+      // Save profile changes
+      document.addEventListener("DOMContentLoaded", function() {
+        const saveBtn = document.getElementById("saveProfileBtn");
+        if (saveBtn) {
+          saveBtn.addEventListener("click", async function() {
+            const gender = document.getElementById("gender").value;
+            const age = document.getElementById("age").value;
+            const birthday = document.getElementById("birthday").value;
+            const body = { gender, age, birthday };
+            saveBtn.disabled = true;
+            saveBtn.textContent = "Saving...";
+            try {
+              const res = await fetch("/api/update-profile", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+              });
+              const data = await res.json();
+              if (data.success) {
+                saveBtn.textContent = "Saved!";
+                setTimeout(() => {
+                  saveBtn.textContent = "Save Changes";
+                  saveBtn.disabled = false;
+                }, 1200);
+              } else {
+                saveBtn.textContent = "Error!";
+                setTimeout(() => {
+                  saveBtn.textContent = "Save Changes";
+                  saveBtn.disabled = false;
+                }, 1200);
+              }
+            } catch (err) {
+              saveBtn.textContent = "Error!";
+              setTimeout(() => {
+                saveBtn.textContent = "Save Changes";
+                saveBtn.disabled = false;
+              }, 1200);
+            }
+          });
+        }
+      });
+
+      // Profile picture change is now handled by ProfileManager
+
+      // Load notifications and update notification count
+      function loadNotifications() {
+        fetch('/api/notifications')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              const unreadCount = data.notifications.filter(n => !n.is_read).length;
+              const countElement = document.getElementById('notificationCount');
+              if (countElement) {
+                if (unreadCount > 0) {
+                  countElement.textContent = unreadCount;
+                  countElement.style.display = 'flex';
+                } else {
+                  countElement.style.display = 'none';
+                }
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Failed to load notifications:', err);
+          });
+      }
+      
+      // Load notifications for dropdown
+      function loadDropdownNotifications() {
+        const dropdownContent = document.getElementById('notificationDropdownContent');
+        dropdownContent.innerHTML = '<div class="notification-loading">Loading notifications...</div>';
+        
+        fetch('/api/notifications')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.notifications.length > 0) {
+              dropdownContent.innerHTML = data.notifications
+                .slice(0, 10) // Show latest 10 notifications
+                .map(notif => `
+                  <div class="notification-dropdown-item ${notif.is_read ? '' : 'unread'}" data-id="${notif.id}">
+                    <div class="notification-message">${notif.message}</div>
+                    <div class="notification-date">${new Date(notif.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</div>
+                  </div>
+                `).join('');
+                
+              // Add click listeners to mark individual notifications as read
+              document.querySelectorAll('.notification-dropdown-item.unread').forEach(item => {
+                item.addEventListener('click', function() {
+                  markNotificationAsRead(this.dataset.id);
+                  this.classList.remove('unread');
+                });
+              });
+            } else {
+              dropdownContent.innerHTML = '<div class="no-notifications">No notifications available</div>';
+            }
+          })
+          .catch(err => {
+            console.error('Failed to load dropdown notifications:', err);
+            dropdownContent.innerHTML = '<div class="no-notifications">Failed to load notifications</div>';
+          });
+      }
+      
+      // Mark single notification as read
+      function markNotificationAsRead(notificationId) {
+        fetch('/api/notifications/mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notificationId: parseInt(notificationId) })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Update notification count
+            loadNotifications();
+          }
+        })
+        .catch(err => {
+          console.error('Failed to mark notification as read:', err);
+        });
+      }
+      
+      // Mark all notifications as read
+      function markAllNotificationsAsRead() {
+        fetch('/api/notifications/mark-all-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Remove unread class from all items
+            document.querySelectorAll('.notification-dropdown-item.unread').forEach(item => {
+              item.classList.remove('unread');
+            });
+            // Update notification count
+            loadNotifications();
+          }
+        })
+        .catch(err => {
+          console.error('Failed to mark all notifications as read:', err);
+        });
+      }
+
+      // Load notifications on page load
+      setTimeout(() => {
+        loadNotifications();
+      }, 3000);
+
+      /* Services modal styles (keeps inside page for now) */
+      (function injectModalStyles(){
+        const css = `
+        .services-modal { position: fixed; left:0;top:0;width:100%;height:100%;background: rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9998; }
+        .services-modal-content { background: #fff; color:#222; width:760px; max-width:92%; border-radius:14px; padding:36px; box-shadow:0 20px 60px rgba(0,0,0,0.35); position:relative; }
+        .close-services-modal { position:absolute; right:18px; top:14px; background:transparent;border:none;font-size:26px; cursor:pointer; color:#999; }
+        .services-title { text-align:center; color:#cf0c02; font-size:34px; margin:6px 0 22px; letter-spacing:4px; }
+        .services-container { display:flex; gap:24px; justify-content:center; }
+        .service-box { width:320px; max-width:44%; background:#fafafa; border-radius:12px; padding:30px 24px; box-shadow:0 8px 24px rgba(0,0,0,0.06); text-align:center; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease; }
+        .service-box i { color:#cf0c02; font-size:48px; margin-bottom:14px; }
+        .service-box p { font-weight:700; letter-spacing:1px; margin:0 0 14px; }
+        .service-price { display:inline-block; background:#fdecea; color:#cf0c02; padding:10px 18px; border-radius:24px; font-weight:800; }
+        .service-box:hover { transform:translateY(-6px); box-shadow:0 18px 40px rgba(0,0,0,0.12); }
+        .service-box.selected { outline:3px solid rgba(207,12,2,0.12); box-shadow:0 24px 50px rgba(0,0,0,0.14); }
+        .service-loading { position:absolute; left:0; right:0; bottom:18px; display:flex; justify-content:center; }
+        .service-loading img{ width:80px; opacity:0.95; }
+        `;
+        const s = document.createElement('style'); s.appendChild(document.createTextNode(css)); document.head.appendChild(s);
+      })();
+
+      // ===== Services Modal JS =====
+      (function(){
+        const servicesModal = document.getElementById('services-modal');
+        const closeBtn = document.querySelector('.close-services-modal');
+        const boxes = document.querySelectorAll('.service-box');
+        const loadingEl = document.querySelector('.service-loading');
+        const navBook = document.getElementById('navBookNowBtn');
+
+        function openModal(){ if (servicesModal) servicesModal.style.display = 'flex'; }
+        function closeModal(){ if (servicesModal) servicesModal.style.display = 'none'; boxes.forEach(b=>b.classList.remove('selected')); }
+
+        if (navBook) navBook.addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (servicesModal) servicesModal.addEventListener('click', function(e){ if (e.target === servicesModal) closeModal(); });
+        document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && servicesModal && servicesModal.style.display === 'flex') closeModal(); });
+
+        boxes.forEach(box=>{
+          box.addEventListener('click', async function(){
+            boxes.forEach(b=>b.classList.remove('selected'));
+            this.classList.add('selected');
+            const svc = this.dataset.service || this.getAttribute('data-service');
+            if (loadingEl) loadingEl.style.display = 'flex';
+            try {
+              await fetch('/api/select-service', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ service: svc }) });
+              try { sessionStorage.setItem('service', svc); } catch(e){}
+              // Small delay to show feedback
+              setTimeout(()=>{
+                if (loadingEl) loadingEl.style.display = 'none';
+                closeModal();
+                try { sessionStorage.setItem('suppressMainLoader','1'); } catch(e){}
+                window.location.href = '/barber';
+              }, 420);
+            } catch(err){
+              console.error('Service select failed', err);
+              if (loadingEl) loadingEl.style.display = 'none';
+              alert('Failed to select service. Please try again.');
+              this.classList.remove('selected');
+            }
+          });
+        });
+      })();
+    </script>
+    <script src="logout-confirm.js"></script>
+  </body>
+</html>
