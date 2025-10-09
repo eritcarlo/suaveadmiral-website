@@ -1803,7 +1803,7 @@
     if (starRating) {
       starRating.addEventListener("click", function(e) {
         if (e.target.tagName === "I") {
-          selectedRating = parseInt(e.target.getAttribute("data-rating"));
+          selectedRating = parseInt(e.target.getAttribute("data-value"));
           updateStarDisplay();
           updateSubmitButton();
         }
@@ -1838,10 +1838,27 @@
         
         reviewLoading.style.display = "flex";
         
+        const rating = parseInt(selectedRating);
+        const name = document.getElementById("reviewName").value.trim();
+        const comment = document.getElementById("reviewComment").value.trim();
+        
+        // Validate data before sending
+        if (!rating || rating < 1 || rating > 5) {
+          alert("Please select a rating between 1 and 5 stars.");
+          reviewLoading.style.display = "none";
+          return;
+        }
+        
+        if (!name) {
+          alert("Please enter your name.");
+          reviewLoading.style.display = "none";
+          return;
+        }
+        
         const formData = {
-          rating: selectedRating,
-          name: document.getElementById("reviewName").value.trim(),
-          comment: document.getElementById("reviewComment").value.trim()
+          rating: rating,
+          name: name,
+          comment: comment
         };
 
         try {
