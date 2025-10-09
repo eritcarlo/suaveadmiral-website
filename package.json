@@ -1,15 +1,19 @@
 {
   "name": "suavewebsite",
   "version": "1.0.0",
-  "main": "server - Copy.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js --host"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Suave Barbershop Website - Complete booking management system",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "express": "^5.1.0",
