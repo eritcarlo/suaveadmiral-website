@@ -549,11 +549,17 @@ function requireRoles(roles) {
 
 // Helper function for backwards compatibility with direct transporter usage
 async function ensureTransporter() {
+  // In production mode, email is intentionally disabled
+  if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
+    console.log('📧 Production mode: Email transporter intentionally disabled');
+    return false; // Return false to indicate email is not available
+  }
+
   if (!transporter) {
-    console.error('❌ Email transporter not initialized - attempting to recreate...');
+    console.log('⚡ Email transporter not initialized - attempting to recreate...');
     transporter = createEmailTransporter();
     if (!transporter) {
-      console.error('❌ Failed to create email transporter');
+      console.warn('⚠️ Failed to create email transporter (non-critical in production)');
       return false;
     }
   }
