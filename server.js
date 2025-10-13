@@ -1,4 +1,4 @@
-const express = require("express");
+iconst express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 const bcrypt = require("bcrypt");
@@ -514,7 +514,7 @@ function isEmailServiceAvailable() {
 }
 
 // Enhanced email sending function using Resend
-async function sendEmail(to, subject, html, from = "Suave Barbershop <noreply@suavebarbershop.com>") {
+async function sendEmail(to, subject, html, from = "Suave Barbershop <onboarding@resend.dev>") {
   try {
     if (!isEmailServiceAvailable()) {
       console.warn('⚠️ Resend email service not configured');
