@@ -514,7 +514,8 @@ function isEmailServiceAvailable() {
 }
 
 // Enhanced email sending function using Resend
-async function sendEmail(to, subject, html, from = "Suave Barbershop <onboarding@resend.dev>") {
+// Use RESEND_FROM env var when available; fallback to onboarding sandbox address
+async function sendEmail(to, subject, html, from = process.env.RESEND_FROM || "Suave Barbershop <onboarding@resend.dev>") {
   try {
     if (!isEmailServiceAvailable()) {
       console.warn('⚠️ Resend email service not configured');
