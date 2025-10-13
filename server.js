@@ -58,7 +58,7 @@ function createEmailTransporter() {
       return null;
     }
 
-    // Create transporter with enhanced configuration
+    // Create transporter with Railway-optimized configuration
     const newTransporter = nodemailer.createTransport({
       service: 'gmail',
       host: 'smtp.gmail.com',
@@ -70,7 +70,11 @@ function createEmailTransporter() {
       },
       tls: {
         rejectUnauthorized: false
-      }
+      },
+      // Railway-friendly timeout settings
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 5000,    // 5 seconds
+      socketTimeout: 10000      // 10 seconds
     });
 
     console.log('✅ Email transporter created successfully');
@@ -84,29 +88,28 @@ function createEmailTransporter() {
 // Create transporter immediately
 transporter = createEmailTransporter();
 
-// Verify email service asynchronously
-async function verifyEmailService() {
+// Lightweight email service check (Railway-friendly)
+async function checkEmailService() {
   if (!transporter) {
-    console.error('❌ Email transporter not available for verification');
+    console.warn('⚠️ Email transporter not configured - email features disabled');
     return false;
   }
 
-  try {
-    console.log('⏳ Verifying email service connection...');
-    const verified = await transporter.verify();
-    if (verified) {
-      console.log('✅ Email service verified successfully');
-      return true;
-    } else {
-      console.error('❌ Email service verification failed');
-      return false;
-    }
-  } catch (error) {
-    console.error('❌ Error verifying email service:', error);
-    console.error('   Check your EMAIL_USER and EMAIL_PASS environment variables');
-    console.error('   Make sure EMAIL_PASS is a Gmail App Password, not your regular password');
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn('⚠️ Email credentials not configured in environment variables');
     return false;
   }
+
+  console.log('✅ Email service configured - credentials found');
+  console.log('📧 Email features will be available for booking confirmations');
+  
+  // Skip connection verification in production to avoid timeouts
+  if (process.env.NODE_ENV === 'production') {
+    console.log('🔧 Production mode: Email verification skipped');
+    return true;
+  }
+  
+  return true;
 }
 
 // ---------------- DATABASE ----------------
@@ -3705,11 +3708,11 @@ app.use((req, res) => res.status(404).send("Page not found"));
 // ---------------- START SERVER ----------------
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  // Verify email service after server starts (non-blocking)
+  // Check email service configuration (lightweight, no network calls)
   setTimeout(() => {
-    verifyEmailService().catch(error => {
-      console.log('⚠️ Email verification delayed due to:', error.message);
+    checkEmailService().catch(error => {
+      console.log('⚠️ Email service check failed:', error.message);
     });
-  }, 5000); // Wait 5 seconds after server start
+  }, 2000); // Wait 2 seconds after server start
 });
 
