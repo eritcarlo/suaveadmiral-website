@@ -3,7 +3,7 @@ const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 const bcrypt = require("bcrypt");
 const session = require("express-session");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const QRCode = require("qrcode");
 const multer = require("multer");
 const fs = require("fs");
@@ -42,80 +42,41 @@ const upload = multer({
   },
 });
 
-// Email configuration - Enhanced with proper error handling
-let transporter = null;
+// Email configuration - Resend (Railway-friendly)
+let resend = null;
 
-// Initialize transporter - Railway deployment safe
-function createEmailTransporter() {
+// Initialize Resend email service
+function initializeResend() {
   try {
-    console.log('⏳ Initializing email transporter...');
-    
-    // Skip email transporter creation in production to prevent issues
-    if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
-      console.log('🚀 Production mode: Email transporter creation skipped');
-      console.log('📧 Email notifications will be logged but not sent');
-      return null; // Intentionally return null in production
-    }
-    
-    // Check required environment variables (non-fatal for deployment)
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn('⚠️ EMAIL_USER and EMAIL_PASS environment variables not configured');
-      console.warn('   Email functionality will be disabled until configured');
-      console.warn('   Set these in Railway environment variables');
+    if (!process.env.RESEND_API_KEY) {
+      console.warn('⚠️ RESEND_API_KEY not configured - email functionality disabled');
+      console.warn('   Set RESEND_API_KEY in Railway environment variables');
       return null;
     }
 
-    // Create transporter with very aggressive timeout settings for Railway
-    const newTransporter = nodemailer.createTransport({
-      service: 'gmail',
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      },
-      tls: {
-        rejectUnauthorized: false
-      },
-      // Very aggressive timeouts for Railway environment
-      connectionTimeout: 3000,  // 3 seconds
-      greetingTimeout: 2000,    // 2 seconds  
-      socketTimeout: 3000       // 3 seconds
-    });
-
-    console.log('✅ Email transporter created successfully');
-    return newTransporter;
+    console.log('⏳ Initializing Resend email service...');
+    const resendClient = new Resend(process.env.RESEND_API_KEY);
+    console.log('✅ Resend email service initialized successfully');
+    return resendClient;
   } catch (error) {
-    console.warn('⚠️ Email transporter creation failed (non-critical):', error.message);
+    console.error('❌ Error initializing Resend:', error.message);
     return null;
   }
 }
 
-// Create transporter immediately
-transporter = createEmailTransporter();
+// Initialize Resend
+resend = initializeResend();
 
-// Lightweight email service check (Railway-friendly)
-async function checkEmailService() {
-  if (!transporter) {
-    console.warn('⚠️ Email transporter not configured - email features disabled');
+// Simple email service check for Resend
+function checkEmailService() {
+  if (!resend) {
+    console.warn('⚠️ Resend not configured - email features disabled');
+    console.warn('   Set RESEND_API_KEY environment variable');
     return false;
   }
 
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.warn('⚠️ Email credentials not configured in environment variables');
-    return false;
-  }
-
-  console.log('✅ Email service configured - credentials found');
-  console.log('📧 Email features will be available for booking confirmations');
-  
-  // Skip connection verification in production to avoid timeouts
-  if (process.env.NODE_ENV === 'production') {
-    console.log('🔧 Production mode: Email verification skipped');
-    return true;
-  }
-  
+  console.log('✅ Resend email service ready');
+  console.log('📧 Email notifications will be sent via Resend');
   return true;
 }
 
@@ -547,31 +508,16 @@ function requireRoles(roles) {
   };
 }
 
-// Helper function for backwards compatibility with direct transporter usage
-async function ensureTransporter() {
-  // In production mode, email is intentionally disabled
-  if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
-    console.log('📧 Production mode: Email transporter intentionally disabled');
-    return false; // Return false to indicate email is not available
-  }
-
-  if (!transporter) {
-    console.log('⚡ Email transporter not initialized - attempting to recreate...');
-    transporter = createEmailTransporter();
-    if (!transporter) {
-      console.warn('⚠️ Failed to create email transporter (non-critical in production)');
-      return false;
-    }
-  }
-  return true;
+// Helper function to check if Resend is available
+function isEmailServiceAvailable() {
+  return resend !== null && process.env.RESEND_API_KEY;
 }
 
-// Enhanced email sending function - Railway deployment safe
-async function sendEmail(to, subject, html) {
+// Enhanced email sending function using Resend
+async function sendEmail(to, subject, html, from = "Suave Barbershop <noreply@suavebarbershop.com>") {
   try {
-    // Quick check without network calls
-    if (!transporter || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn('⚠️ Email service not configured - skipping email send');
+    if (!isEmailServiceAvailable()) {
+      console.warn('⚠️ Resend email service not configured');
       return { success: false, error: 'Email service not configured' };
     }
 
@@ -580,46 +526,27 @@ async function sendEmail(to, subject, html) {
       return { success: false, error: 'Missing email parameters' };
     }
 
-    // In production/Railway, skip email sending to prevent timeouts
-    if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
-      console.log(`📧 Production mode: Email sending skipped for ${to}`);
-      console.log(`📧 Subject would have been: ${subject}`);
-      return { success: true, messageId: 'skipped-in-production' };
-    }
-
-    const mailOptions = {
-      from: `Suave Barbershop <${process.env.EMAIL_USER}>`,
-      to: to,
-      subject: subject,
-      html: html
-    };
-
-    console.log(`📧 Attempting to send email to: ${to}`);
+    console.log(`📧 Sending email via Resend to: ${to}`);
     console.log(`📧 Subject: ${subject}`);
-    
-    // Very aggressive timeout for Railway - 5 seconds only
-    const emailPromise = transporter.sendMail(mailOptions);
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Email timeout after 5 seconds')), 5000);
+
+    const { data, error } = await resend.emails.send({
+      from: from,
+      to: [to],
+      subject: subject,
+      html: html,
     });
-    
-    const info = await Promise.race([emailPromise, timeoutPromise]);
-    
-    console.log(`✅ Email sent successfully to ${to}`);
-    console.log(`📧 Message ID: ${info.messageId}`);
-    
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.warn(`⚠️ Email send failed (non-critical): ${error.message}`);
-    
-    // Don't log full error details in production to avoid spam
-    if (process.env.NODE_ENV !== 'production') {
-      if (error.code) console.error(`   Error code: ${error.code}`);
-      if (error.response) console.error(`   SMTP response: ${error.response}`);
+
+    if (error) {
+      throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
     }
+
+    console.log(`✅ Email sent successfully via Resend`);
+    console.log(`📧 Message ID: ${data.id}`);
     
-    // Return success even if email fails - don't block the main functionality
-    return { success: true, messageId: 'email-skipped-due-to-error' };
+    return { success: true, messageId: data.id };
+  } catch (error) {
+    console.error(`❌ Email send failed: ${error.message}`);
+    return { success: false, error: error.message };
   }
 }
 
@@ -3171,20 +3098,9 @@ app.post("/api/forgot-password", async (req, res) => {
       }
     }, 10 * 60 * 1000); // 10 minutes
 
-    // Send verification code via email
+    // Send verification code via email using Resend
     try {
-      if (!(await ensureTransporter())) {
-        return res.status(500).json({ 
-          success: false, 
-          error: "Email service temporarily unavailable" 
-        });
-      }
-      
-      await transporter.sendMail({
-        from: `Suave Barbershop <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "Password Reset Verification Code - Suave Barbershop",
-        html: `
+      const emailHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #cf0c02;">Password Reset Request</h2>
             <p>Dear Customer,</p>
@@ -3199,8 +3115,17 @@ app.post("/api/forgot-password", async (req, res) => {
             <p>If you did not request this password reset, please ignore this email.</p>
             <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
           </div>
-        `,
-      });
+        `;
+
+      const emailResult = await sendEmail(
+        email, 
+        "Password Reset Verification Code - Suave Barbershop", 
+        emailHtml
+      );
+
+      if (!emailResult.success) {
+        throw new Error(emailResult.error);
+      }
       
       console.log(`Verification code sent to ${email}: ${verificationCode}`); // Debug log
       res.json({ success: true, message: "Verification code sent to your email" });
@@ -3734,8 +3659,14 @@ app.use((req, res) => res.status(404).send("Page not found"));
 
 // ---------------- START SERVER ----------------
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📧 Email service: ${process.env.EMAIL_USER ? 'Configured' : 'Not configured'}`);
-  console.log(`🌐 Ready to accept connections`);
+  console.log(`🚀 Suave Barbershop Server Started`);
+  console.log(`📊 Port: ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📧 Email: ${isEmailServiceAvailable() ? 'Resend Ready ✅' : 'Not configured ⚠️'}`);
+  console.log(`💾 Database: Connected`);
+  console.log(`🌐 Server ready to accept connections!`);
+  
+  // Check email service on startup
+  checkEmailService();
 });
 
