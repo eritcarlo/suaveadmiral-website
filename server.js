@@ -45,18 +45,21 @@ const upload = multer({
 // Email configuration - Enhanced with proper error handling
 let transporter = null;
 
-async function initializeEmailService() {
+// Initialize transporter immediately
+function createEmailTransporter() {
   try {
-    console.log('⏳ Initializing email service...');
+    console.log('⏳ Initializing email transporter...');
     
     // Check required environment variables
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       console.error('❌ EMAIL_USER and EMAIL_PASS environment variables are required');
-      return false;
+      console.error('   Current EMAIL_USER:', process.env.EMAIL_USER || 'NOT SET');
+      console.error('   Current EMAIL_PASS:', process.env.EMAIL_PASS ? 'SET' : 'NOT SET');
+      return null;
     }
 
     // Create transporter with enhanced configuration
-    transporter = nodemailer.createTransport({
+    const newTransporter = nodemailer.createTransporter({
       service: 'gmail',
       host: 'smtp.gmail.com',
       port: 587,
@@ -70,20 +73,38 @@ async function initializeEmailService() {
       }
     });
 
-    // Verify the connection configuration
+    console.log('✅ Email transporter created successfully');
+    return newTransporter;
+  } catch (error) {
+    console.error('❌ Error creating email transporter:', error);
+    return null;
+  }
+}
+
+// Create transporter immediately
+transporter = createEmailTransporter();
+
+// Verify email service asynchronously
+async function verifyEmailService() {
+  if (!transporter) {
+    console.error('❌ Email transporter not available for verification');
+    return false;
+  }
+
+  try {
+    console.log('⏳ Verifying email service connection...');
     const verified = await transporter.verify();
     if (verified) {
-      console.log('✅ Email service initialized and verified successfully');
+      console.log('✅ Email service verified successfully');
       return true;
     } else {
       console.error('❌ Email service verification failed');
       return false;
     }
   } catch (error) {
-    console.error('❌ Error initializing email service:', error);
+    console.error('❌ Error verifying email service:', error);
     console.error('   Check your EMAIL_USER and EMAIL_PASS environment variables');
     console.error('   Make sure EMAIL_PASS is a Gmail App Password, not your regular password');
-    transporter = null;
     return false;
   }
 }
@@ -516,11 +537,23 @@ function requireRoles(roles) {
   };
 }
 
+// Helper function for backwards compatibility with direct transporter usage
+async function ensureTransporter() {
+  if (!transporter) {
+    console.error('❌ Email transporter not initialized - attempting to recreate...');
+    transporter = createEmailTransporter();
+    if (!transporter) {
+      console.error('❌ Failed to create email transporter');
+      return false;
+    }
+  }
+  return true;
+}
+
 // Enhanced email sending function
 async function sendEmail(to, subject, html) {
   try {
-    if (!transporter) {
-      console.error('❌ Email transporter not initialized');
+    if (!(await ensureTransporter())) {
       return { success: false, error: 'Email service not available' };
     }
 
@@ -3110,6 +3143,13 @@ app.post("/api/forgot-password", async (req, res) => {
 
     // Send verification code via email
     try {
+      if (!(await ensureTransporter())) {
+        return res.status(500).json({ 
+          success: false, 
+          error: "Email service temporarily unavailable" 
+        });
+      }
+      
       await transporter.sendMail({
         from: `Suave Barbershop <${process.env.EMAIL_USER}>`,
         to: email,
@@ -3257,7 +3297,8 @@ app.post("/api/reset-password", async (req, res) => {
         resetTokens.delete(token);
 
         // Send confirmation email
-        transporter.sendMail({
+        if (transporter) {
+          transporter.sendMail({
           from: `Suave Barbershop <${process.env.EMAIL_USER}>`,
           to: email,
           subject: "Password Reset Successful - Suave Barbershop",
@@ -3271,7 +3312,8 @@ app.post("/api/reset-password", async (req, res) => {
               <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
             </div>
           `,
-        }).catch(err => console.error("Confirmation email error:", err));
+          }).catch(err => console.error("Confirmation email error:", err));
+        }
 
         res.json({ 
           success: true, 
@@ -3663,7 +3705,7 @@ app.use((req, res) => res.status(404).send("Page not found"));
 // ---------------- START SERVER ----------------
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  // Initialize email service after server starts
-  initializeEmailService();
+  // Verify email service after server starts
+  verifyEmailService();
 });
 
