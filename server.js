@@ -59,7 +59,7 @@ function createEmailTransporter() {
     }
 
     // Create transporter with enhanced configuration
-    const newTransporter = nodemailer.createTransporter({
+    const newTransporter = nodemailer.createTransport({
       service: 'gmail',
       host: 'smtp.gmail.com',
       port: 587,
