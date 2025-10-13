@@ -3251,13 +3251,12 @@ app.post("/api/reset-password", async (req, res) => {
         resetCodes.delete(email);
         resetTokens.delete(token);
 
-        // Send confirmation email
-        if (transporter) {
-          transporter.sendMail({
-          from: `Suave Barbershop <${process.env.EMAIL_USER}>`,
-          to: email,
-          subject: "Password Reset Successful - Suave Barbershop",
-          html: `
+        // Send confirmation email using Resend
+        if (isEmailServiceAvailable()) {
+          sendEmail(
+            email,
+            "Password Reset Successful - Suave Barbershop",
+            `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #cf0c02;">Password Reset Successful</h2>
               <p>Dear Customer,</p>
@@ -3266,8 +3265,8 @@ app.post("/api/reset-password", async (req, res) => {
               <p>If you did not make this change, please contact us immediately.</p>
               <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
             </div>
-          `,
-          }).catch(err => console.error("Confirmation email error:", err));
+            `
+          ).catch(err => console.error("Confirmation email error:", err));
         }
 
         res.json({ 
