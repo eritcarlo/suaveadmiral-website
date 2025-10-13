@@ -42,14 +42,51 @@ const upload = multer({
   },
 });
 
-// Email configuration
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER || "immrclrnz@gmail.com",
-    pass: process.env.EMAIL_PASS || "lagl vivy osbc wyxa",
-  },
-});
+// Email configuration - Enhanced with proper error handling
+let transporter = null;
+
+async function initializeEmailService() {
+  try {
+    console.log('⏳ Initializing email service...');
+    
+    // Check required environment variables
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('❌ EMAIL_USER and EMAIL_PASS environment variables are required');
+      return false;
+    }
+
+    // Create transporter with enhanced configuration
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+
+    // Verify the connection configuration
+    const verified = await transporter.verify();
+    if (verified) {
+      console.log('✅ Email service initialized and verified successfully');
+      return true;
+    } else {
+      console.error('❌ Email service verification failed');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Error initializing email service:', error);
+    console.error('   Check your EMAIL_USER and EMAIL_PASS environment variables');
+    console.error('   Make sure EMAIL_PASS is a Gmail App Password, not your regular password');
+    transporter = null;
+    return false;
+  }
+}
 
 // ---------------- DATABASE ----------------
 const dbPath = process.env.DATABASE_URL || path.join(__dirname, "barbershop.db");
@@ -479,73 +516,121 @@ function requireRoles(roles) {
   };
 }
 
-// Email sending function
-async function sendBookingConfirmation(email, bookingDetails) {
+// Enhanced email sending function
+async function sendEmail(to, subject, html) {
   try {
+    if (!transporter) {
+      console.error('❌ Email transporter not initialized');
+      return { success: false, error: 'Email service not available' };
+    }
+
+    if (!to || !subject || !html) {
+      console.error('❌ Missing required email parameters');
+      return { success: false, error: 'Missing email parameters' };
+    }
+
     const mailOptions = {
-      from: process.env.EMAIL_USER || "immrclrnz@gmail.com",
-      to: email,
-      subject: "Booking Confirmation - Suave Barbershop",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #cf0c02;">Booking Confirmation</h2>
-          <p>Dear Valued Customer,</p>
-          <p>Your appointment has been successfully confirmed! Here are your booking details:</p>
-          <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <ul style="list-style: none; padding: 0;">
-              <li style="margin: 10px 0;"><strong>Time:</strong> ${bookingDetails.time}</li>
-              <li style="margin: 10px 0;"><strong>Service:</strong> ${bookingDetails.service}</li>
-              <li style="margin: 10px 0;"><strong>Payment Method:</strong> ${bookingDetails.payment_method}</li>
-              <li style="margin: 10px 0;"><strong>Barber:</strong> ${bookingDetails.barber}</li>
-            </ul>
-          </div>
-          <p>Please arrive 10 minutes before your scheduled time.</p>
-          <p>Thank you for choosing Suave Barbershop!</p>
-          <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
-        </div>
-      `,
+      from: `Suave Barbershop <${process.env.EMAIL_USER}>`,
+      to: to,
+      subject: subject,
+      html: html
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log("Booking confirmation email sent to:", email);
+    console.log(`📧 Sending email to: ${to}`);
+    console.log(`📧 Subject: ${subject}`);
+    
+    const info = await transporter.sendMail(mailOptions);
+    
+    console.log(`✅ Email sent successfully to ${to}`);
+    console.log(`📧 Message ID: ${info.messageId}`);
+    
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("Email sending error:", error);
+    console.error(`❌ Error sending email to ${to}:`, error);
+    
+    // Log specific error details for debugging
+    if (error.code) {
+      console.error(`   Error code: ${error.code}`);
+    }
+    if (error.response) {
+      console.error(`   SMTP response: ${error.response}`);
+    }
+    
+    return { success: false, error: error.message };
   }
 }
 
-// Email sending function for cancellations
+// Updated booking confirmation function
+async function sendBookingConfirmation(email, bookingDetails) {
+  try {
+    const subject = "Booking Confirmation - Suave Barbershop";
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #cf0c02;">Booking Confirmation</h2>
+        <p>Dear Valued Customer,</p>
+        <p>Your appointment has been successfully confirmed! Here are your booking details:</p>
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin: 10px 0;"><strong>Time:</strong> ${bookingDetails.time}</li>
+            <li style="margin: 10px 0;"><strong>Service:</strong> ${bookingDetails.service}</li>
+            <li style="margin: 10px 0;"><strong>Payment Method:</strong> ${bookingDetails.payment_method}</li>
+            <li style="margin: 10px 0;"><strong>Barber:</strong> ${bookingDetails.barber}</li>
+          </ul>
+        </div>
+        <p>Please arrive 10 minutes before your scheduled time.</p>
+        <p>Thank you for choosing Suave Barbershop!</p>
+        <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
+      </div>
+    `;
+
+    const result = await sendEmail(email, subject, html);
+    if (result.success) {
+      console.log("✅ Booking confirmation email sent successfully");
+    } else {
+      console.error("❌ Failed to send booking confirmation email:", result.error);
+    }
+    return result;
+  } catch (error) {
+    console.error("❌ Booking confirmation email error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Updated cancellation email function
 async function sendCancellationEmail(email, bookingDetails) {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER || "immrclrnz@gmail.com",
-      to: email,
-      subject: "Appointment Cancellation - Suave Barbershop",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #cf0c02;">Appointment Cancellation Notice</h2>
-          <p>Dear Valued Customer,</p>
-          <p>We regret to inform you that your appointment has been cancelled due to valid reasons beyond our control.</p>
-          <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #333;">Cancelled Appointment Details:</h3>
-            <ul style="list-style: none; padding: 0;">
-              <li style="margin: 10px 0;"><strong>Service:</strong> ${bookingDetails.service}</li>
-              <li style="margin: 10px 0;"><strong>Date:</strong> ${bookingDetails.booking_date}</li>
-              <li style="margin: 10px 0;"><strong>Time:</strong> ${bookingDetails.time}</li>
-              <li style="margin: 10px 0;"><strong>Barber:</strong> ${bookingDetails.barber}</li>
-            </ul>
-          </div>
-          <p>We sincerely apologize for any inconvenience this may cause. We would be happy to assist you in rescheduling your appointment at your earliest convenience.</p>
-          <p>Please feel free to contact us or visit our website to book a new appointment that suits your schedule.</p>
-          <p>Thank you for your understanding and continued patronage.</p>
-          <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
+    const subject = "Appointment Cancellation - Suave Barbershop";
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #cf0c02;">Appointment Cancellation Notice</h2>
+        <p>Dear Valued Customer,</p>
+        <p>We regret to inform you that your appointment has been cancelled due to valid reasons beyond our control.</p>
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #333;">Cancelled Appointment Details:</h3>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin: 10px 0;"><strong>Service:</strong> ${bookingDetails.service}</li>
+            <li style="margin: 10px 0;"><strong>Date:</strong> ${bookingDetails.booking_date}</li>
+            <li style="margin: 10px 0;"><strong>Time:</strong> ${bookingDetails.time}</li>
+            <li style="margin: 10px 0;"><strong>Barber:</strong> ${bookingDetails.barber}</li>
+          </ul>
         </div>
-      `,
-    };
+        <p>We sincerely apologize for any inconvenience this may cause. We would be happy to assist you in rescheduling your appointment at your earliest convenience.</p>
+        <p>Please feel free to contact us or visit our website to book a new appointment that suits your schedule.</p>
+        <p>Thank you for your understanding and continued patronage.</p>
+        <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
+      </div>
+    `;
 
-    await transporter.sendMail(mailOptions);
-    console.log("Cancellation email sent to:", email);
+    const result = await sendEmail(email, subject, html);
+    if (result.success) {
+      console.log("✅ Cancellation email sent successfully");
+    } else {
+      console.error("❌ Failed to send cancellation email:", result.error);
+    }
+    return result;
   } catch (error) {
-    console.error("Cancellation email sending error:", error);
+    console.error("❌ Cancellation email error:", error);
+    return { success: false, error: error.message };
   }
 }
 
@@ -3026,7 +3111,7 @@ app.post("/api/forgot-password", async (req, res) => {
     // Send verification code via email
     try {
       await transporter.sendMail({
-        from: process.env.EMAIL_USER || "immrclrnz@gmail.com",
+        from: `Suave Barbershop <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Password Reset Verification Code - Suave Barbershop",
         html: `
@@ -3173,7 +3258,7 @@ app.post("/api/reset-password", async (req, res) => {
 
         // Send confirmation email
         transporter.sendMail({
-          from: process.env.EMAIL_USER || "immrclrnz@gmail.com",
+          from: `Suave Barbershop <${process.env.EMAIL_USER}>`,
           to: email,
           subject: "Password Reset Successful - Suave Barbershop",
           html: `
@@ -3578,5 +3663,7 @@ app.use((req, res) => res.status(404).send("Page not found"));
 // ---------------- START SERVER ----------------
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  // Initialize email service after server starts
+  initializeEmailService();
 });
 
