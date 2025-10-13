@@ -553,11 +553,13 @@ async function ensureTransporter() {
   return true;
 }
 
-// Enhanced email sending function
+// Enhanced email sending function - Railway optimized
 async function sendEmail(to, subject, html) {
   try {
-    if (!(await ensureTransporter())) {
-      return { success: false, error: 'Email service not available' };
+    // Quick check without network calls
+    if (!transporter || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn('⚠️ Email service not configured - skipping email send');
+      return { success: false, error: 'Email service not configured' };
     }
 
     if (!to || !subject || !html) {
@@ -572,10 +574,16 @@ async function sendEmail(to, subject, html) {
       html: html
     };
 
-    console.log(`📧 Sending email to: ${to}`);
+    console.log(`📧 Attempting to send email to: ${to}`);
     console.log(`📧 Subject: ${subject}`);
     
-    const info = await transporter.sendMail(mailOptions);
+    // Add timeout to prevent hanging
+    const emailPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Email timeout after 15 seconds')), 15000);
+    });
+    
+    const info = await Promise.race([emailPromise, timeoutPromise]);
     
     console.log(`✅ Email sent successfully to ${to}`);
     console.log(`📧 Message ID: ${info.messageId}`);
@@ -3708,11 +3716,7 @@ app.use((req, res) => res.status(404).send("Page not found"));
 // ---------------- START SERVER ----------------
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  // Check email service configuration (lightweight, no network calls)
-  setTimeout(() => {
-    checkEmailService().catch(error => {
-      console.log('⚠️ Email service check failed:', error.message);
-    });
-  }, 2000); // Wait 2 seconds after server start
+  console.log(`📧 Email service: ${process.env.EMAIL_USER ? 'Configured' : 'Not configured'}`);
+  console.log(`🌐 Ready to accept connections`);
 });
 
