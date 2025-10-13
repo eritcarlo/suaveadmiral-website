@@ -45,16 +45,16 @@ const upload = multer({
 // Email configuration - Enhanced with proper error handling
 let transporter = null;
 
-// Initialize transporter immediately
+// Initialize transporter - Railway deployment safe
 function createEmailTransporter() {
   try {
     console.log('⏳ Initializing email transporter...');
     
-    // Check required environment variables
+    // Check required environment variables (non-fatal for deployment)
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error('❌ EMAIL_USER and EMAIL_PASS environment variables are required');
-      console.error('   Current EMAIL_USER:', process.env.EMAIL_USER || 'NOT SET');
-      console.error('   Current EMAIL_PASS:', process.env.EMAIL_PASS ? 'SET' : 'NOT SET');
+      console.warn('⚠️ EMAIL_USER and EMAIL_PASS environment variables not configured');
+      console.warn('   Email functionality will be disabled until configured');
+      console.warn('   Set these in Railway environment variables');
       return null;
     }
 
@@ -3705,7 +3705,11 @@ app.use((req, res) => res.status(404).send("Page not found"));
 // ---------------- START SERVER ----------------
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  // Verify email service after server starts
-  verifyEmailService();
+  // Verify email service after server starts (non-blocking)
+  setTimeout(() => {
+    verifyEmailService().catch(error => {
+      console.log('⚠️ Email verification delayed due to:', error.message);
+    });
+  }, 5000); // Wait 5 seconds after server start
 });
 
