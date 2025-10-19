@@ -534,6 +534,52 @@ body {
   padding: 25px;
 }
 
+/* Signup Verification Modal tweaks */
+#signupVerifyModal .modal-content {
+  max-width: 420px;
+}
+#signupVerifyModal .modal-body {
+  padding: 20px 25px 24px;
+  color: #fff;
+  line-height: 1.45;
+}
+#signupVerifyModal .modal-body p {
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.92);
+}
+#signupVerifyModal .form-group {
+  margin-bottom: 14px;
+}
+#signupVerifyModal .form-group input {
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 6px;
+}
+/* Ensure the Verify + Resend buttons sit side-by-side and share space */
+#signupVerifyModal .modal-body > div {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+#signupVerifyModal .form-btn {
+  width: auto;
+  flex: 1 1 0;
+  margin-bottom: 0;
+}
+#signupVerifyModal #signupResendCode {
+  background: #6b7280;
+  color: #fff;
+}
+#signupVerifyModal #signupVerifySubmit {
+  background: #dc2626;
+}
+#signupVerifyMessage {
+  min-height: 18px;
+  font-size: 13px;
+  color: #ffb3b3;
+  margin-top: 10px;
+}
+
 .form-group {
   margin-bottom: 20px;
   position: relative;
