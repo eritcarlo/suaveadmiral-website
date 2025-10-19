@@ -1,7 +1,8 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
-const bcrypt = require("bcrypt");
+// Use bcryptjs (pure JS) to avoid native compilation on deploy
+const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const { Resend } = require("resend");
 const QRCode = require("qrcode");
