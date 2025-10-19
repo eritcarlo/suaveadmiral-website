@@ -418,37 +418,94 @@ class FormManager {
     submitBtn.textContent = 'Creating Account...';
 
     try {
-      const response = await fetch('/api/register', {
+      // Start signup verification flow instead of direct register
+      const response = await fetch('/api/signup-start', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, full_name: fullName, role }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: fullName, email, password })
       });
-
       const data = await response.json();
 
       if (response.ok) {
-        // Store credentials for auto-login
-        sessionStorage.setItem('registeredEmail', email);
-        sessionStorage.setItem('registeredPassword', password);
-        
-        this.modalManager.showSuccess('Registration successful! Your login credentials will be auto-filled for your convenience.', () => {
-          this.modalManager.switchModal('login');
-          // Auto-fill the login form after modal switch
-          setTimeout(() => {
-            this.autoFillLoginAfterSignup();
-          }, 200);
-        });
+        // Open verification modal
+        const verifyModal = document.getElementById('signupVerifyModal');
+        if (verifyModal) {
+          verifyModal.classList.add('active');
+          verifyModal.style.display = 'flex';
+          document.body.classList.add('modal-open');
+        }
+        // Store email and password temporarily in session for auto-fill after verify
+        sessionStorage.setItem('pendingSignupEmail', email);
+        sessionStorage.setItem('pendingSignupPassword', password);
+        document.getElementById('signupVerifyMessage').textContent = '';
       } else {
-        // Handle error response - server returns { error: "message" }
-        this.modalManager.showSuccess('❌ ' + (data.error || data.message || 'Registration failed'));
+        this.modalManager.showSuccess('❌ ' + (data.error || data.message || 'Failed to start signup'));
       }
     } catch (error) {
       this.modalManager.showSuccess('❌ Network error: ' + error.message);
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = originalText;
+    }
+  }
+
+  // Verification handlers
+  async handleSignupVerify() {
+    const code = document.getElementById('signupVerifyCode').value.trim();
+    const email = sessionStorage.getItem('pendingSignupEmail');
+    const password = sessionStorage.getItem('pendingSignupPassword');
+
+    if (!code || !email) {
+      document.getElementById('signupVerifyMessage').textContent = 'Please enter the verification code.';
+      return;
+    }
+
+    document.getElementById('signupVerifySubmit').disabled = true;
+
+    try {
+      const res = await fetch('/api/signup-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+      const json = await res.json();
+      if (res.ok) {
+        // Close verify modal and show success, then autofill login
+        const verifyModal = document.getElementById('signupVerifyModal');
+        if (verifyModal) { verifyModal.classList.remove('active'); verifyModal.style.display = 'none'; document.body.classList.remove('modal-open'); }
+
+        sessionStorage.setItem('registeredEmail', email);
+        sessionStorage.setItem('registeredPassword', password);
+        sessionStorage.removeItem('pendingSignupEmail');
+        sessionStorage.removeItem('pendingSignupPassword');
+
+        this.modalManager.showSuccess('Account created! Your login credentials have been saved for convenience.', () => {
+          this.modalManager.switchModal('login');
+          setTimeout(() => this.autoFillLoginAfterSignup(), 200);
+        });
+      } else {
+        document.getElementById('signupVerifyMessage').textContent = json.error || json.message || 'Verification failed';
+      }
+    } catch (err) {
+      document.getElementById('signupVerifyMessage').textContent = 'Network error: ' + err.message;
+    } finally {
+      document.getElementById('signupVerifySubmit').disabled = false;
+    }
+  }
+
+  async handleSignupResend() {
+    const email = sessionStorage.getItem('pendingSignupEmail');
+    if (!email) return;
+    try {
+      const res = await fetch('/api/signup-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: '', email, password: sessionStorage.getItem('pendingSignupPassword') || '' })
+      });
+      const j = await res.json();
+      document.getElementById('signupVerifyMessage').textContent = res.ok ? 'Verification code resent' : (j.error || 'Failed to resend');
+    } catch (err) {
+      document.getElementById('signupVerifyMessage').textContent = 'Network error: ' + err.message;
     }
   }
 
@@ -929,6 +986,17 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     document.body.style.opacity = '1';
   }, 100);
+
+  // Verify modal controls
+  const verifyClose = document.getElementById('verifyClose');
+  if (verifyClose) verifyClose.addEventListener('click', () => {
+    const vm = document.getElementById('signupVerifyModal'); if (vm) { vm.classList.remove('active'); vm.style.display = 'none'; document.body.classList.remove('modal-open'); }
+  });
+
+  const signupVerifySubmit = document.getElementById('signupVerifySubmit');
+  if (signupVerifySubmit) signupVerifySubmit.addEventListener('click', (e) => { e.preventDefault(); formManager.handleSignupVerify(); });
+  const signupResendCode = document.getElementById('signupResendCode');
+  if (signupResendCode) signupResendCode.addEventListener('click', (e) => { e.preventDefault(); formManager.handleSignupResend(); });
 });
 
 // Add smooth loading transition

@@ -224,6 +224,28 @@
     </div>
   </div>
 
+  <!-- Verification Modal (for signup) -->
+  <div id="signupVerifyModal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Verify Your Email</h2>
+        <button class="modal-close" id="verifyClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Please enter the 6-digit code sent to your email to complete registration.</p>
+        <div class="form-group">
+          <input type="text" id="signupVerifyCode" placeholder="Enter verification code" maxlength="6" />
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button id="signupVerifySubmit" class="form-btn">Verify</button>
+          <button id="signupResendCode" class="form-btn" style="background:#6b7280;">Resend</button>
+        </div>
+        <div id="signupVerifyMessage" style="margin-top:12px;color:#cf0c02;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Terms Modal -->
   <div id="termsModal" class="modal">
     <div class="modal-overlay"></div>

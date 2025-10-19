@@ -3049,6 +3049,8 @@ app.post("/api/select-service", requireLogin, (req, res) => {
 // Store for temporary reset codes (in production, use Redis or database)
 const resetCodes = new Map(); // { email: { code, timestamp, verified } }
 const resetTokens = new Map(); // { token: { email, timestamp } }
+// Store for temporary signup verifications (in production, use Redis or DB table)
+const pendingSignups = new Map(); // { email: { full_name, passwordHash, role, code, timestamp } }
 
 // Generate 6-digit verification code
 function generateVerificationCode() {
@@ -3136,6 +3138,128 @@ app.post("/api/forgot-password", async (req, res) => {
       res.status(500).json({ success: false, error: "Failed to send verification email" });
     }
   });
+});
+
+// Signup start - send verification code and store pending signup
+app.post('/api/signup-start', async (req, res) => {
+  try {
+    const { full_name, email, password } = req.body;
+
+    if (!full_name || !email || !password) {
+      return res.status(400).json({ success: false, error: 'Name, email and password are required' });
+    }
+
+    // Basic email format check
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return res.status(400).json({ success: false, error: 'Invalid email address' });
+    }
+
+    // Check if user already exists
+    db.get('SELECT id FROM users WHERE email = ?', [email], async (err, row) => {
+      if (err) {
+        console.error('DB error checking user exists:', err);
+        return res.status(500).json({ success: false, error: 'Database error' });
+      }
+
+      if (row) {
+        // For privacy, reply with a generic success message (avoid revealing existence)
+        return res.json({ success: true, message: 'If the email is not registered, a verification code has been sent' });
+      }
+
+      // Rate limit: prevent re-sending code too often
+      const existing = pendingSignups.get(email);
+      const now = Date.now();
+      if (existing && now - existing.timestamp < 60 * 1000) {
+        return res.status(429).json({ success: false, error: 'Please wait before requesting another code' });
+      }
+
+      // Hash password now and store temporarily
+      const passwordHash = await bcrypt.hash(password, 10);
+      const code = generateVerificationCode();
+      const timestamp = Date.now();
+
+      pendingSignups.set(email, {
+        full_name,
+        passwordHash,
+        role: 'USER',
+        code,
+        timestamp
+      });
+
+      // Send verification email (reuse style from forgot-password earlier)
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #cf0c02;">Verify your Email Address</h2>
+          <p>Hello ${full_name || 'Customer'},</p>
+          <p>Thank you for registering at Suave Barbershop. Use the verification code below to complete your registration. This code will expire in 10 minutes.</p>
+          <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <h3 style="margin-top: 0; color: #333;">Your Verification Code:</h3>
+            <div style="font-size: 32px; font-weight: bold; color: #cf0c02; letter-spacing: 5px; margin: 20px 0;">${code}</div>
+            <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes</p>
+          </div>
+          <p>If you did not request this, please ignore this email.</p>
+          <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
+        </div>
+      `;
+
+      const result = await sendEmail(email, 'Verify your email - Suave Barbershop', emailHtml);
+      if (!result.success) {
+        pendingSignups.delete(email);
+        console.error('Signup verification email error:', result.error);
+        return res.status(500).json({ success: false, error: 'Failed to send verification email' });
+      }
+
+      // Clean up pending after 10 minutes
+      setTimeout(() => {
+        const stored = pendingSignups.get(email);
+        if (stored && stored.timestamp === timestamp) pendingSignups.delete(email);
+      }, 10 * 60 * 1000);
+
+      return res.json({ success: true, message: 'Verification code sent to email' });
+    });
+  } catch (error) {
+    console.error('Signup start error:', error);
+    return res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// Signup verify - verify code and create user
+app.post('/api/signup-verify', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).json({ success: false, error: 'Email and code are required' });
+
+    const stored = pendingSignups.get(email);
+    if (!stored) return res.status(400).json({ success: false, error: 'No pending signup found or code expired' });
+
+    const now = Date.now();
+    if (now - stored.timestamp > 10 * 60 * 1000) {
+      pendingSignups.delete(email);
+      return res.status(400).json({ success: false, error: 'Verification code expired' });
+    }
+
+    if (stored.code !== code) return res.status(400).json({ success: false, error: 'Invalid verification code' });
+
+    // Create user in DB
+    db.run(
+      'INSERT INTO users (email, password, role, full_name, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)',
+      [email, stored.passwordHash, stored.role || 'USER', stored.full_name || ''],
+      function(err) {
+        if (err) {
+          console.error('Error creating user after verification:', err);
+          return res.status(500).json({ success: false, error: 'Database error creating user' });
+        }
+
+        // Clean up
+        pendingSignups.delete(email);
+
+        return res.json({ success: true, message: 'Account created successfully' });
+      }
+    );
+  } catch (error) {
+    console.error('Signup verify error:', error);
+    return res.status(500).json({ success: false, error: 'Server error' });
+  }
 });
 
 // Verify reset code
