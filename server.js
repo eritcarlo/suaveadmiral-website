@@ -528,35 +528,20 @@ async function sendEmail(to, subject, html, from = process.env.RESEND_FROM || "S
       return { success: false, error: 'Missing email parameters' };
     }
 
-    console.log('📧 Email Send Attempt:');
-    console.log(`   To: ${to}`);
-    console.log(`   From: ${from}`);
-    console.log(`   Subject: ${subject}`);
-    console.log(`   HTML Length: ${html.length} characters`);
+    console.log(`📧 Sending email via Resend to: ${to}`);
+    console.log(`📧 Subject: ${subject}`);
 
-    console.log('📧 Attempting Resend API call...');
-    
     const { data, error } = await resend.emails.send({
       from: from,
       to: [to],
       subject: subject,
       html: html,
-      headers: {
-        'X-Entity-Ref-ID': `suave-${Date.now()}`,
-        'Feedback-Id': 'suave-verification'
-      }
     });
 
-    // Enhanced response logging
-    console.log('📧 Resend API Response:');
-    console.log(`   Success: ${!!data && !error}`);
-    console.log(`   Message ID: ${data?.id || 'Not available'}`);
-    console.log(`   Full Response: ${JSON.stringify(data)}`);
-    
+    // Log entire response for debugging (warnings, rejection reasons may appear here)
+    console.log('✅ Resend response:', JSON.stringify(data));
     if (error) {
-      console.error('❌ Resend API Error Details:');
-      console.error(`   Error: ${error.message || JSON.stringify(error)}`);
-      console.error(`   Code: ${error.statusCode || 'N/A'}`);
+      console.error('❌ Resend API returned error object:', error);
       throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
     }
 
