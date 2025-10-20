@@ -538,14 +538,17 @@ async function sendEmail(to, subject, html, from = process.env.RESEND_FROM || "S
       html: html,
     });
 
+    // Log entire response for debugging (warnings, rejection reasons may appear here)
+    console.log('✅ Resend response:', JSON.stringify(data));
     if (error) {
+      console.error('❌ Resend API returned error object:', error);
       throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
     }
 
     console.log(`✅ Email sent successfully via Resend`);
-    console.log(`📧 Message ID: ${data.id}`);
-    
-    return { success: true, messageId: data.id };
+    if (data && data.id) console.log(`📧 Message ID: ${data.id}`);
+
+    return { success: true, messageId: data && data.id ? data.id : null, raw: data };
   } catch (error) {
     console.error(`❌ Email send failed: ${error.message}`);
     return { success: false, error: error.message };

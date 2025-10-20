@@ -436,6 +436,8 @@ class FormManager {
         }
         // Store email and password temporarily in session for auto-fill after verify
         sessionStorage.setItem('pendingSignupEmail', email);
+        // also store the full name so resends can include it
+        sessionStorage.setItem('pendingSignupName', fullName);
         sessionStorage.setItem('pendingSignupPassword', password);
         document.getElementById('signupVerifyMessage').textContent = '';
       } else {
@@ -500,7 +502,11 @@ class FormManager {
       const res = await fetch('/api/signup-start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name: '', email, password: sessionStorage.getItem('pendingSignupPassword') || '' })
+        body: JSON.stringify({
+          full_name: sessionStorage.getItem('pendingSignupName') || '',
+          email,
+          password: sessionStorage.getItem('pendingSignupPassword') || ''
+        })
       });
       const j = await res.json();
       document.getElementById('signupVerifyMessage').textContent = res.ok ? 'Verification code resent' : (j.error || 'Failed to resend');
