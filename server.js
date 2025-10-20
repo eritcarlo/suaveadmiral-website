@@ -3322,6 +3322,30 @@ app.post("/api/verify-reset-code", (req, res) => {
   });
 });
 
+// Debug endpoint: send a test email and return Resend response (protected by DEBUG_EMAIL_TOKEN)
+app.post('/debug/send-test-email', async (req, res) => {
+  const token = req.query.token || req.headers['x-debug-token'];
+  const expected = process.env.DEBUG_EMAIL_TOKEN || 'dev-debug-token-please-change';
+  if (!token || token !== expected) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+  const { to, subject, html } = req.body || {};
+  if (!to) return res.status(400).json({ success: false, error: 'Recipient (to) is required in JSON body' });
+
+  try {
+    const sendResult = await sendEmail(
+      to,
+      subject || 'Test email from Suave Barbershop',
+      html || `<div style="font-family: Arial;">This is a test email from Suave Barbershop at ${new Date().toISOString()}</div>`
+    );
+
+    // Return full send result (including raw Resend response)
+    return res.json({ success: true, sendResult });
+  } catch (err) {
+    console.error('Debug send failed:', err);
+    return res.status(500).json({ success: false, error: err.message || String(err) });
+  }
+});
+
 // Reset password with token
 app.post("/api/reset-password", async (req, res) => {
   const { email, token, newPassword } = req.body;
