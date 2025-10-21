@@ -15,7 +15,16 @@ const PORT = process.env.PORT || 3000;
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, "uploads", "barbers");
+    let uploadDir;
+    // Check file type to determine destination folder
+    if (file.fieldname === 'barberPicture') {
+      uploadDir = path.join(__dirname, "uploads", "barbers");
+    } else if (file.fieldname === 'receipt') {
+      uploadDir = path.join(__dirname, "uploads", "receipts");
+    } else {
+      uploadDir = path.join(__dirname, "uploads");
+    }
+    
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -24,7 +33,8 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     // Generate unique filename with timestamp
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "barber-" + uniqueSuffix + path.extname(file.originalname));
+    const prefix = file.fieldname === 'barberPicture' ? 'barber-' : 'receipt-';
+    cb(null, prefix + uniqueSuffix + path.extname(file.originalname));
   },
 });
 
@@ -103,6 +113,7 @@ function migrateDatabase() {
     "ALTER TABLE bookings ADD COLUMN is_walk_in BOOLEAN DEFAULT 0",
     "ALTER TABLE bookings ADD COLUMN confirmed_by_admin BOOLEAN DEFAULT 0",
     "ALTER TABLE bookings ADD COLUMN reference_number TEXT",
+    "ALTER TABLE bookings ADD COLUMN receipt_image TEXT",
     "ALTER TABLE barbers ADD COLUMN profile_pic TEXT",
     "ALTER TABLE barbers ADD COLUMN is_present BOOLEAN DEFAULT 1",
     "ALTER TABLE barbers ADD COLUMN contact_number TEXT",
@@ -286,7 +297,7 @@ db.run(`
     payment_method TEXT,
     is_walk_in BOOLEAN DEFAULT 0,
     confirmed_by_admin BOOLEAN DEFAULT 0,
-    reference_number TEXT,
+    receipt_image TEXT,
     booked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (barber_id) REFERENCES barbers(id),
@@ -813,114 +824,256 @@ app.get("/api/available-times/:barberId", (req, res) => {
 });
 
 // ✅ Book a service (ensure no double booking for user or barber/time) - UPDATED with booking limit
-app.post("/api/book-service", (req, res) => {
-  if (!req.session.user) {
-    return res
-      .status(401)
-      .json({ success: false, error: "You must be logged in" });
-  }
+// Handle receipt image upload - Unified handler
+app.post("/api/upload-receipt", upload.single('receipt'), (req, res) => {
+  console.log("Receipt upload request received");
+  console.log("Request body:", req.body);
+  console.log("File:", req.file);
   
-  const {
-    service,
-    barber_id,
-    time_id,
-    booking_date,
-    reference_number,
-    payment_method,
-  } = req.body;
+  const { bookingId } = req.body;
   
-  if (!service || !barber_id || !time_id || !booking_date || !payment_method) {
-    return res.status(400).json({
+  // Input validation
+  if (!req.file) {
+    console.log("No file uploaded");
+    return res.status(400).json({ 
       success: false,
-      error: "Missing required fields including payment method",
+      error: "No receipt image uploaded" 
     });
   }
 
-  // For non-cash payments, reference number is required
-  if (payment_method !== "cash" && !reference_number) {
-    return res.status(400).json({
+  if (!bookingId) {
+    console.log("No bookingId provided");
+    return res.status(400).json({ 
       success: false,
-      error: "Reference number is required for non-cash payments",
+      error: "Booking ID is required" 
     });
   }
 
-  // Check user's booking limit (3 active bookings maximum)
-  db.get(
-    "SELECT COUNT(*) as count FROM bookings WHERE user_id = ? AND status NOT IN ('Done', 'Cancelled')",
-    [req.session.user.id],
-    (err, countResult) => {
-      if (err) {
-        return res.status(500).json({ success: false, error: "Database error" });
-      }
+  // Validate file type and size
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+  if (!allowedTypes.includes(req.file.mimetype)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid file type. Please upload a JPEG or PNG image"
+    });
+  }
 
-      if (countResult.count >= 3) {
-        return res.status(400).json({
-          success: false,
-          error: "You have reached the maximum limit of 3 active bookings. Please complete or cancel existing bookings before making a new one.",
+  if (req.file.size > 5 * 1024 * 1024) { // 5MB limit
+    return res.status(400).json({
+      success: false,
+      error: "File is too large. Maximum size is 5MB"
+    });
+  }
+
+  const receiptPath = '/uploads/receipts/' + req.file.filename;
+  console.log("Receipt path:", receiptPath);
+  
+  // First verify the booking exists
+  db.get("SELECT id FROM bookings WHERE id = ?", [bookingId], (checkErr, booking) => {
+    if (checkErr) {
+      console.error("Error checking booking:", checkErr);
+      return res.status(500).json({ 
+        success: false,
+        error: "Error verifying booking: " + checkErr.message 
+      });
+    }
+    
+    if (!booking) {
+      console.log("Booking not found:", bookingId);
+      return res.status(404).json({ 
+        success: false,
+        error: "Booking not found" 
+      });
+    }
+
+    // Update the receipt image
+    db.run(
+      "UPDATE bookings SET receipt_image = ? WHERE id = ?",
+      [receiptPath, bookingId],
+      (err) => {
+        if (err) {
+          console.error("Error updating receipt image:", err);
+          console.error("SQL Error Code:", err.code);
+          console.error("SQL Error Message:", err.message);
+          return res.status(500).json({ 
+            success: false,
+            error: "Failed to update receipt image: " + err.message 
+          });
+        }
+        
+        console.log("Receipt successfully updated for booking:", bookingId);
+        res.json({ 
+          success: true,
+          message: "Receipt uploaded successfully",
+          receiptPath: receiptPath
         });
       }
+    );
+  });
+});
 
-      // Check if barber is already booked for that time AND date (FIXED)
-      db.get(
-        "SELECT * FROM bookings WHERE barber_id = ? AND time_id = ? AND booking_date = ? AND status NOT IN ('Done', 'Cancelled')",
-        [barber_id, time_id, booking_date],
-        (err, existingBooking) => {
-          if (err)
-            return res
-              .status(500)
-              .json({ success: false, error: "Database error" });
-          if (existingBooking) {
-            return res.status(400).json({
-              success: false,
-              error: "This barber is already booked at that time on this date.",
-            });
-          }
+app.post("/api/book-service", upload.single('receipt'), (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res
+        .status(401)
+        .json({ success: false, error: "You must be logged in" });
+    }
+    
+    console.log("Booking request received:", { 
+      body: req.body,
+      file: req.file ? { 
+        filename: req.file.filename,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      } : null
+    });
+    
+    const {
+      service,
+      barber_id,
+      time_id,
+      booking_date,
+      payment_method,
+    } = req.body;
+    
+    if (!service || !barber_id || !time_id || !booking_date || !payment_method) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields including payment method",
+      });
+    }
 
-          // Insert booking
-          db.run(
-            "INSERT INTO bookings (user_id, service, barber_id, time_id, booking_date, reference_number, payment_method) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [
+    // Validate payment method
+    if (!["cash", "gcash", "paymaya"].includes(payment_method.toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid payment method. Allowed methods: cash, gcash, paymaya"
+      });
+    }
+
+    // For non-cash payments, receipt image is required
+    if (payment_method.toLowerCase() !== "cash" && !req.file) {
+      return res.status(400).json({
+        success: false,
+        error: "Receipt image is required for non-cash payments",
+      });
+    }
+
+    // Validate receipt file if present
+    if (req.file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid file type. Please upload a JPEG or PNG image"
+        });
+      }
+      if (req.file.size > 5 * 1024 * 1024) { // 5MB limit
+        return res.status(400).json({
+          success: false,
+          error: "File is too large. Maximum size is 5MB"
+        });
+      }
+    }
+
+    // Check user's booking limit (3 active bookings maximum)
+    db.get(
+      "SELECT COUNT(*) as count FROM bookings WHERE user_id = ? AND status NOT IN ('Done', 'Cancelled')",
+      [req.session.user.id],
+      (err, countResult) => {
+        if (err) {
+          console.error("Error checking booking limit:", err);
+          return res.status(500).json({ 
+            success: false, 
+            error: "Database error while checking booking limit: " + err.message 
+          });
+        }
+
+        if (countResult.count >= 3) {
+          return res.status(400).json({
+            success: false,
+            error: "You have reached the maximum limit of 3 active bookings. Please complete or cancel existing bookings before making a new one.",
+          });
+        }
+
+        // Check if barber is already booked for that time AND date
+        db.get(
+          "SELECT * FROM bookings WHERE barber_id = ? AND time_id = ? AND booking_date = ? AND status NOT IN ('Done', 'Cancelled')",
+          [barber_id, time_id, booking_date],
+          (err, existingBooking) => {
+            if (err) {
+              console.error("Error checking existing booking:", err);
+              return res.status(500).json({ 
+                success: false, 
+                error: "Database error while checking existing bookings: " + err.message 
+              });
+            }
+
+            if (existingBooking) {
+              return res.status(400).json({
+                success: false,
+                error: "This barber is already booked at that time on this date.",
+              });
+            }
+
+            // Standardize service name to uppercase
+            const standardizedService = service.toUpperCase();
+
+            // Insert booking
+            const bookingValues = [
               req.session.user.id,
-              service,
+              standardizedService,
               barber_id,
               time_id,
               booking_date,
-              reference_number || null,
-              payment_method,
-            ],
-            function (err3) {
-              if (err3)
-                return res
-                  .status(500)
-                  .json({ success: false, error: "Database error" });
+              payment_method.toLowerCase(),
+              req.file ? `/uploads/receipts/${req.file.filename}` : null
+            ];
 
-              // Create notification (but don't send email yet)
+            console.log("Inserting booking with values:", bookingValues);
 
-                // User notification (for user interface)
+            db.run(
+              "INSERT INTO bookings (user_id, service, barber_id, time_id, booking_date, payment_method, receipt_image) VALUES (?, ?, ?, ?, ?, ?, ?)",
+              bookingValues,
+              function (err3) {
+                if (err3) {
+                  console.error("Error inserting booking:", err3);
+                  return res.status(500).json({ 
+                    success: false, 
+                    error: "Database error while creating booking: " + err3.message 
+                  });
+                }
+
+                const bookingId = this.lastID;
+
+                // Create user notification
                 db.run(
                   "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)",
                   [
                     req.session.user.id,
-                    `Your booking for ${service} on ${booking_date} has been submitted and is pending admin confirmation.`,
+                    `Your booking for ${standardizedService} on ${booking_date} has been submitted and is pending admin confirmation.`,
                     "booking",
                   ],
                   (notifErr) => {
-                    if (notifErr) console.error("Notification error:", notifErr);
+                    if (notifErr) {
+                      console.error("User notification error:", notifErr);
+                    }
                   }
                 );
 
-                // Admin notification (for admin interface)
+                // Create admin notifications
                 db.get("SELECT full_name, email FROM users WHERE id = ?", [req.session.user.id], (userErr, userRow) => {
                   let userDisplay = userRow?.full_name || userRow?.email || `User ${req.session.user.id}`;
-                  // Find all admins
-                  db.all("SELECT id FROM users WHERE role = 'ADMIN' OR role = 'SUPERADMIN'", [], (adminErr, adminRows) => {
+                  
+                  db.all("SELECT id FROM users WHERE role IN ('ADMIN', 'SUPERADMIN')", [], (adminErr, adminRows) => {
                     if (adminRows && adminRows.length > 0) {
                       adminRows.forEach(admin => {
                         db.run(
                           "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)",
                           [
                             admin.id,
-                            `${userDisplay} has booked an appointment for ${service} on ${booking_date}.`,
+                            `${userDisplay} has booked an appointment for ${standardizedService} on ${booking_date}.`,
                             "admin-booking",
                           ],
                           (notifErr) => {
@@ -932,19 +1085,30 @@ app.post("/api/book-service", (req, res) => {
                   });
                 });
 
-              res.json({
-                success: true,
-                message: "Booking submitted! Awaiting admin confirmation.",
-                bookingId: this.lastID,
-                remainingBookings: 3 - (countResult.count + 1),
-              });
-            }
-          );
-        }
-      );
-    }
-  );
+                console.log("Booking created successfully:", bookingId);
+                
+                res.json({
+                  success: true,
+                  message: "Booking submitted! Awaiting admin confirmation.",
+                  bookingId: bookingId,
+                  remainingBookings: 3 - (countResult.count + 1),
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error("Unexpected error in book-service:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "Server error: " + error.message 
+    });
+  }
 });
+
+
 
 // Get user's current booking count
 app.get("/api/user-booking-count", requireLogin, (req, res) => {
@@ -1143,7 +1307,7 @@ app.get("/api/my-bookings", (req, res) => {
     return res.status(401).json({ success: false, error: "Login required" });
 
   const query = `
-    SELECT b.id, b.service, br.name AS barber, t.time AS time, b.status, b.payment_method, b.booking_date, b.booked_at
+    SELECT b.id, b.service, br.name AS barber, t.time AS time, b.status, b.payment_method, b.booking_date, b.booked_at, b.receipt_image
     FROM bookings b
     LEFT JOIN barbers br ON b.barber_id = br.id
     LEFT JOIN timeslots t ON b.time_id = t.id
@@ -1403,7 +1567,7 @@ app.get(
     }
     
     const query = `
-      SELECT b.id, u.full_name, b.service, br.name AS barber, t.time, b.booking_date, b.status, b.payment_method, b.is_walk_in, b.confirmed_by_admin, b.reference_number, b.booked_at
+      SELECT b.id, u.full_name, b.service, br.name AS barber, t.time, b.booking_date, b.status, b.payment_method, b.is_walk_in, b.confirmed_by_admin, b.receipt_image, b.booked_at
       FROM bookings b
       LEFT JOIN users u ON b.user_id = u.id
       LEFT JOIN barbers br ON b.barber_id = br.id

@@ -158,19 +158,16 @@
             </div>
           </div>
 
-          <!-- Reference Number Input -->
-          <div id="reference-section" class="reference-section" style="display: none;">
-            <h3>PAYMENT REFERENCE NUMBER</h3>
-            <div class="reference-input">
-              <input
-                type="text"
-                id="reference-number"
-                placeholder="Enter your payment reference number"
-                required
-              />
-              <small id="reference-instruction"
-                >Please enter the reference number from your payment</small
-              >
+          <!-- Receipt Upload Section -->
+          <div id="receipt-section" class="receipt-section" style="display: none;">
+            <h3>Upload Payment Receipt</h3>
+            <div class="receipt-upload">
+              <label for="receipt-image" class="receipt-upload-label">
+                <i class="fas fa-upload"></i> Choose Receipt Image
+              </label>
+              <input type="file" id="receipt-image" accept="image/*" style="display: none">
+              <img id="receipt-preview" class="receipt-preview" alt="Receipt preview">
+              <small>Please upload a clear image of your payment receipt to confirm your booking.</small>
             </div>
           </div>
 
@@ -577,51 +574,45 @@
         }
       }
 
-      // Handle payment method selection (UPDATED)
+      // Handle payment method selection
       document.querySelectorAll('input[name="payment"]').forEach((radio) => {
         radio.addEventListener("change", async function () {
           const selectedMethod = this.value;
           const qrSection = document.getElementById("qr-section");
           const cashPriceSection = document.getElementById("cash-price-section");
-          const referenceInput = document.getElementById("reference-number");
-          const referenceInstruction = document.getElementById(
-            "reference-instruction"
-          );
+          const receiptSection = document.getElementById("receipt-section");
 
           // Get the selected service
           const service = sessionStorage.getItem("service") || "HAIRCUT";
 
-          // Hide all QR items and sections first
-          document.getElementById("gcash-qr-item").style.display = "none";
-          document.getElementById("paymaya-qr-item").style.display = "none";
+          // Hide all sections first
           qrSection.style.display = "none";
           cashPriceSection.style.display = "none";
+          receiptSection.style.display = "none";
+          document.getElementById("gcash-qr-item").style.display = "none";
+          document.getElementById("paymaya-qr-item").style.display = "none";
 
           if (selectedMethod === "cash") {
             // Show cash price section
             cashPriceSection.style.display = "block";
             updatePriceDisplay(service, "cash");
             
-            referenceInput.placeholder = "Enter receipt number or leave blank";
-            referenceInstruction.textContent =
-              "For cash payments, you can enter a receipt number or leave blank";
-            referenceInput.required = false;
-            // Hide reference number input for cash payments
-            const refSection = document.getElementById('reference-section');
-            if (refSection) refSection.style.display = 'none';
+            // Hide receipt upload for cash payments
+            const receiptSection = document.getElementById('receipt-section');
+            if (receiptSection) receiptSection.style.display = 'none';
           } else if (selectedMethod === "gcash") {
             // Show GCash QR code and price
             qrSection.style.display = "block";
             document.getElementById("gcash-qr-item").style.display = "block";
             updatePriceDisplay(service, "gcash");
             
-            referenceInput.placeholder = "Enter GCash reference number";
-            referenceInstruction.textContent =
-              "Please enter the reference number from your GCash payment";
-            referenceInput.required = true;
-            // Show reference number input for GCash
-            const refSectionG = document.getElementById('reference-section');
-            if (refSectionG) refSectionG.style.display = 'block';
+            // Show receipt upload for GCash
+            const receiptSectionG = document.getElementById('receipt-section');
+            if (receiptSectionG) {
+              receiptSectionG.style.display = 'block';
+              document.querySelector('#receipt-section small').textContent = 
+                'Please upload a screenshot of your GCash payment confirmation.';
+            }
             await loadGCashQR();
           } else if (selectedMethod === "paymaya") {
             // Show PayMaya QR code and price
@@ -629,13 +620,13 @@
             document.getElementById("paymaya-qr-item").style.display = "block";
             updatePriceDisplay(service, "paymaya");
             
-            referenceInput.placeholder = "Enter PayMaya reference number";
-            referenceInstruction.textContent =
-              "Please enter the reference number from your PayMaya payment";
-            referenceInput.required = true;
-            // Show reference number input for PayMaya
-            const refSectionP = document.getElementById('reference-section');
-            if (refSectionP) refSectionP.style.display = 'block';
+            // Show receipt upload for PayMaya
+            const receiptSectionP = document.getElementById('receipt-section');
+            if (receiptSectionP) {
+              receiptSectionP.style.display = 'block';
+              document.querySelector('#receipt-section small').textContent = 
+                'Please upload a screenshot of your PayMaya payment confirmation.';
+            }
             await loadPayMayaQR();
           }
         });
@@ -701,31 +692,46 @@
             return;
           }
 
-          const referenceNumber = document
-            .getElementById("reference-number")
-            .value.trim();
-
-          // For cash payments, reference number is optional
-          if (selectedPaymentMethod.value !== "cash" && !referenceNumber) {
-            showModal("Please enter your payment reference number.");
-            return;
+          // Check for receipt image if not cash payment
+          const receiptFile = document.getElementById("receipt-image").files[0];
+          if (selectedPaymentMethod.value !== "cash") {
+            if (!receiptFile) {
+              showModal("Please upload your payment receipt image.");
+              return;
+            }
+            // Validate receipt image
+            if (receiptFile.size > 5 * 1024 * 1024) { // 5MB limit
+              showModal('Image size should be less than 5MB');
+              return;
+            }
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!allowedTypes.includes(receiptFile.type)) {
+              showModal('Please upload a valid image file (JPEG, JPG, or PNG)');
+              return;
+            }
           }
 
           // You may want to get the selected service from session or another source
           const service = sessionStorage.getItem("service") || "Haircut";
           try {
+            // First create the booking
+            const formData = new FormData();
+            formData.append('service', service);
+            formData.append('barber_id', selectedBarberId);
+            formData.append('time_id', selectedTimeId);
+            formData.append('booking_date', selectedDate);
+            formData.append('payment_method', selectedPaymentMethod.value);
+            
+            // Include receipt if not cash payment
+            if (selectedPaymentMethod.value !== "cash" && receiptFile) {
+              formData.append('receipt', receiptFile);
+            }
+
             const res = await fetch("/api/book-service", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                service,
-                barber_id: selectedBarberId,
-                time_id: selectedTimeId,
-                booking_date: selectedDate,
-                reference_number: referenceNumber || null,
-                payment_method: selectedPaymentMethod.value,
-              }),
+              body: formData
             });
+            
             const data = await res.json();
             if (data.success) {
               let message = "Booking submitted! Your booking is pending admin confirmation. You will receive an email once confirmed.";
@@ -752,7 +758,8 @@
               showModal(data.error || "Booking failed.");
             }
           } catch (err) {
-            showModal("Booking failed.");
+            console.error('Booking error:', err);
+            showModal("Booking failed. Please try again.");
           }
         });
 
@@ -780,6 +787,28 @@
       window.addEventListener("focus", function () {
         if (selectedBarberId && selectedDate) {
           loadAvailableTimes(selectedBarberId, selectedDate);
+        }
+      });
+
+      // Handle receipt image upload
+      const receiptInput = document.getElementById('receipt-image');
+      const receiptPreview = document.getElementById('receipt-preview');
+
+      receiptInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            showModal('Image size should be less than 5MB');
+            this.value = '';
+            return;
+          }
+          
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            receiptPreview.style.display = 'block';
+            receiptPreview.src = e.target.result;
+          }
+          reader.readAsDataURL(file);
         }
       });
 

@@ -533,7 +533,7 @@
       th:nth-child(3), td:nth-child(3) { width: 10%; } /* Barber */
       th:nth-child(4), td:nth-child(4) { width: 8%; }  /* Time */
       th:nth-child(5), td:nth-child(5) { width: 10%; } /* Date */
-      th:nth-child(6), td:nth-child(6) { width: 12%; } /* Reference */
+      th:nth-child(6), td:nth-child(6) { width: 12%; } /* Receipt */
       th:nth-child(7), td:nth-child(7) { width: 8%; }  /* Status */
       th:nth-child(8), td:nth-child(8) { width: 8%; }  /* Payment */
       th:nth-child(9), td:nth-child(9) { width: 7%; }  /* Type */
@@ -970,7 +970,7 @@
             <th>Barber</th>
             <th>Time</th>
             <th>Booking Date</th>
-            <th>Reference Number</th>
+            <th>Receipt</th>
             <th>Status</th>
             <th>Payment</th>
             <th>Type</th>
@@ -1089,7 +1089,64 @@
     <!-- Shared Admin Notification Manager -->
     <script src="admin-notifications.js"></script>
 
+    <!-- Receipt Image Modal -->
+    <div id="receipt-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <img id="receipt-image" src="" alt="Receipt">
+      </div>
+    </div>
+
+    <style>
+      /* Receipt Image Modal */
+      #receipt-modal .modal-content {
+        max-width: 90%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      #receipt-modal img {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+        border-radius: 8px;
+      }
+
+      .view-receipt-link {
+        color: #cf0c02;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      .view-receipt-link:hover {
+        color: #a30901;
+      }
+    </style>
+
     <script>
+        // Receipt modal functionality
+        const receiptModal = document.getElementById('receipt-modal');
+        const receiptImage = document.getElementById('receipt-image');
+
+        function showReceiptModal(imagePath) {
+          receiptModal.style.display = 'block';
+          receiptImage.src = imagePath;
+        }
+
+        // Close receipt modal when clicking the close button or outside
+        receiptModal.querySelector('.close').addEventListener('click', () => {
+          receiptModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+          if (event.target === receiptModal) {
+            receiptModal.style.display = 'none';
+          }
+        });
+
         // ========== ADMIN NOTIFICATION BELL (Now handled by shared manager) ==========
         // The notification functionality is now handled by admin-notifications.js
       // Modal functions
@@ -1501,7 +1558,9 @@
           <td>${b.barber || "-"}</td>
           <td>${b.time || "-"}</td>
           <td>${b.booking_date || "-"}</td>
-          <td>${b.reference_number || "-"}</td>
+          <td>${b.receipt_image ? 
+              `<a href="javascript:void(0)" class="view-receipt-link" onclick="showReceiptModal('${b.receipt_image}')">View Receipt</a>` 
+              : "No Receipt"}</td>
           <td><span class="${statusClass}">${b.status}</span></td>
           <td>${b.payment_method || "Not paid"}</td>
           <td>${b.is_walk_in ? "Walk-in" : "Online"}</td>
