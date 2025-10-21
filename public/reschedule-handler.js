@@ -69,7 +69,7 @@ function setupRescheduleModal() {
     const modal = document.getElementById('reschedule-modal');
     const closeBtn = document.querySelector('.close-reschedule');
     const cancelBtn = document.getElementById('cancel-reschedule');
-    const confirmBtn = document.getElementById('confirm-reschedule');
+    const confirmBtn = document.getElementById('confirm-reschedule-booking');
     const barberSelect = document.getElementById('reschedule-barber');
     const dateInput = document.getElementById('reschedule-date');
     const timeSelect = document.getElementById('reschedule-time');
