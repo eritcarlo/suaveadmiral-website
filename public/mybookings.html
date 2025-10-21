@@ -121,7 +121,6 @@
         </div>
         <div id="confirm-buttons" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
           <button id="confirm-yes" class="modal-btn confirm-btn" style="background-color: #dc3545; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;">Yes</button>
-          <button id="confirm-reschedule" class="modal-btn reschedule-btn" style="background-color: #007bff; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;">Reschedule</button>
           <button id="confirm-no" class="modal-btn cancel-btn" style="background-color: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;">No</button>
         </div>
       </div>
@@ -220,20 +219,18 @@
     }
 
     // Confirmation modal functions
-    function showConfirmModal(message, bookingId) {
+    function showConfirmModal(message) {
       return new Promise((resolve) => {
         document.getElementById("confirm-message").textContent = message;
         document.getElementById("confirm-modal").style.display = "block";
         
         const yesBtn = document.getElementById("confirm-yes");
         const noBtn = document.getElementById("confirm-no");
-        const rescheduleBtn = document.getElementById("confirm-reschedule");
         const closeBtn = document.querySelector(".close-confirm");
         
         function cleanup() {
           yesBtn.removeEventListener("click", handleYes);
           noBtn.removeEventListener("click", handleNo);
-          rescheduleBtn.removeEventListener("click", handleReschedule);
           closeBtn.removeEventListener("click", handleNo);
           document.getElementById("confirm-modal").style.display = "none";
         }
@@ -248,15 +245,8 @@
           resolve(false);
         }
         
-        function handleReschedule() {
-          cleanup();
-          openRescheduleModal(bookingId);
-          resolve('reschedule');
-        }
-        
         yesBtn.addEventListener("click", handleYes);
         noBtn.addEventListener("click", handleNo);
-        rescheduleBtn.addEventListener("click", handleReschedule);
         closeBtn.addEventListener("click", handleNo);
       });
     }
