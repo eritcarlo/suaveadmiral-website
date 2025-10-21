@@ -175,6 +175,10 @@ async function openRescheduleModal(bookingId) {
 
         // Show modal first, then loading state
         modal.style.display = 'block';
+        
+        // Setup modal handlers
+        setupRescheduleModal();
+        
         loadingDiv.style.display = 'flex';
 
         // Load barbers
@@ -305,5 +309,5 @@ function getStatusClass(statusText) {
 
 // Initialize when document is ready
 document.addEventListener('DOMContentLoaded', () => {
-    setupRescheduleModal();
+    // Event handlers will be set up when the modal is opened
 });
