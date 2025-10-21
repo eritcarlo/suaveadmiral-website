@@ -1013,6 +1013,130 @@ app.get("/api/barbers", (req, res) => {
   });
 });
 
+// Get user's today's appointments
+// Reschedule booking endpoint
+app.post("/api/reschedule-booking", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ 
+      success: false, 
+      error: "You must be logged in" 
+    });
+  }
+
+  const { bookingId, barberId, timeId, bookingDate } = req.body;
+
+  if (!bookingId || !barberId || !timeId || !bookingDate) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing required fields"
+    });
+  }
+
+  // First check if the new time slot is available
+  db.get(
+    "SELECT * FROM bookings WHERE barber_id = ? AND time_id = ? AND booking_date = ? AND status NOT IN ('Done', 'Cancelled')",
+    [barberId, timeId, bookingDate],
+    (err, existingBooking) => {
+      if (err) return res.status(500).json({ success: false, error: "Database error" });
+      if (existingBooking) {
+        return res.status(400).json({
+          success: false,
+          error: "This time slot is already booked"
+        });
+      }
+
+      // If available, update the booking
+      db.run(
+        `UPDATE bookings 
+         SET barber_id = ?, time_id = ?, booking_date = ?, status = 'Pending', confirmed_by_admin = 0
+         WHERE id = ? AND user_id = ?`,
+        [barberId, timeId, bookingDate, bookingId, req.session.user.id],
+        function(err) {
+          if (err) return res.status(500).json({ success: false, error: "Database error" });
+          if (this.changes === 0) {
+            return res.status(404).json({
+              success: false,
+              error: "Booking not found or unauthorized"
+            });
+          }
+
+          // Create notification for user
+          db.run(
+            "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)",
+            [
+              req.session.user.id,
+              `Your booking has been rescheduled and is pending admin confirmation.`,
+              "booking"
+            ]
+          );
+
+          // Create notification for admins
+          db.all(
+            "SELECT id FROM users WHERE role IN ('ADMIN', 'SUPERADMIN')",
+            [],
+            (err, admins) => {
+              if (admins) {
+                admins.forEach(admin => {
+                  db.run(
+                    "INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)",
+                    [
+                      admin.id,
+                      `A booking has been rescheduled and needs confirmation.`,
+                      "admin-booking"
+                    ]
+                  );
+                });
+              }
+            }
+          );
+
+          res.json({
+            success: true,
+            message: "Booking rescheduled successfully"
+          });
+        }
+      );
+    }
+  );
+});
+
+app.get("/api/appointments/today", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ 
+      success: false, 
+      error: "You must be logged in" 
+    });
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const query = `
+    SELECT b.id, b.service, br.name as barber, t.time, b.status
+    FROM bookings b
+    LEFT JOIN barbers br ON b.barber_id = br.id
+    LEFT JOIN timeslots t ON b.time_id = t.id
+    WHERE b.user_id = ? 
+    AND b.booking_date = ? 
+    AND b.status NOT IN ('Done', 'Cancelled')
+    ORDER BY t.time ASC
+  `;
+
+  db.all(query, [req.session.user.id, today], (err, appointments) => {
+    if (err) {
+      console.error("Error fetching today's appointments:", err);
+      return res.status(500).json({ 
+        success: false, 
+        error: "Database error" 
+      });
+    }
+
+    res.json({
+      success: true,
+      appointments: appointments || []
+    });
+  });
+});
+
 // View user bookings
 app.get("/api/my-bookings", (req, res) => {
   if (!req.session.user)

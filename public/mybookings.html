@@ -6,6 +6,7 @@
   <title>My Bookings - Suave Barbershop</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="mybookings.css">
+  <link rel="stylesheet" href="reschedule-modal.css">
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
@@ -112,12 +113,16 @@
 
     <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal">
-      <div class="modal-content">
+      <div class="modal-content" style="text-align: center;">
         <span class="close-confirm">&times;</span>
-        <div id="confirm-message"></div>
-        <div id="confirm-buttons">
-          <button id="confirm-yes" class="modal-btn confirm-btn">Yes</button>
-          <button id="confirm-no" class="modal-btn cancel-btn">No</button>
+        <div id="confirm-message" style="font-size: 1.1em; margin-bottom: 10px;"></div>
+        <div id="confirm-notice" class="confirm-notice" style="color: #dc3545; margin: 15px 0; font-size: 0.9em; font-style: italic;">
+          Please be advised that any payments made are non-refundable as per our booking policy.
+        </div>
+        <div id="confirm-buttons" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+          <button id="confirm-yes" class="modal-btn confirm-btn" style="background-color: #dc3545; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;">Yes</button>
+          <button id="confirm-reschedule" class="modal-btn reschedule-btn" style="background-color: #007bff; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;">Reschedule</button>
+          <button id="confirm-no" class="modal-btn cancel-btn" style="background-color: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;">No</button>
         </div>
       </div>
     </div>
@@ -157,7 +162,52 @@
     <p>© Marco Lorenzo Reyes, Rasheed Kenian Saladino, Angelo Fronda and John Carlo Erit</p>
   </footer>
 
+  <!-- Reschedule Modal -->
+  <div id="reschedule-modal" class="modal reschedule-modal">
+    <div class="modal-content">
+      <span class="close-reschedule">&times;</span>
+      <h2><i class="fas fa-calendar-alt"></i> Reschedule Booking</h2>
+      
+      <div class="reschedule-form">
+        <!-- Barber Selection -->
+        <div class="form-group">
+          <label for="reschedule-barber">Choose Barber:</label>
+          <select id="reschedule-barber" required>
+            <option value="">Choose a barber</option>
+          </select>
+        </div>
+
+        <!-- Date Selection -->
+        <div class="form-group">
+          <label for="reschedule-date">Select Date:</label>
+          <input type="date" id="reschedule-date" required>
+        </div>
+
+        <!-- Time Selection -->
+        <div class="form-group">
+          <label for="reschedule-time">Select Time:</label>
+          <select id="reschedule-time" disabled required>
+            <option value="">Select date and barber first</option>
+          </select>
+        </div>
+
+        <!-- Button Group -->
+        <div class="modal-actions">
+          <button id="cancel-reschedule" class="btn-secondary">Cancel</button>
+          <button id="confirm-reschedule" class="btn-primary">Confirm</button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="reschedule-loading">
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>Please wait...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="profile-manager.js"></script>
+  <script src="reschedule-handler.js"></script>
   <script>
     // Modal functions
     function showModal(message) {
@@ -170,18 +220,20 @@
     }
 
     // Confirmation modal functions
-    function showConfirmModal(message) {
+    function showConfirmModal(message, bookingId) {
       return new Promise((resolve) => {
         document.getElementById("confirm-message").textContent = message;
         document.getElementById("confirm-modal").style.display = "block";
         
         const yesBtn = document.getElementById("confirm-yes");
         const noBtn = document.getElementById("confirm-no");
+        const rescheduleBtn = document.getElementById("confirm-reschedule");
         const closeBtn = document.querySelector(".close-confirm");
         
         function cleanup() {
           yesBtn.removeEventListener("click", handleYes);
           noBtn.removeEventListener("click", handleNo);
+          rescheduleBtn.removeEventListener("click", handleReschedule);
           closeBtn.removeEventListener("click", handleNo);
           document.getElementById("confirm-modal").style.display = "none";
         }
@@ -196,8 +248,15 @@
           resolve(false);
         }
         
+        function handleReschedule() {
+          cleanup();
+          openRescheduleModal(bookingId);
+          resolve('reschedule');
+        }
+        
         yesBtn.addEventListener("click", handleYes);
         noBtn.addEventListener("click", handleNo);
+        rescheduleBtn.addEventListener("click", handleReschedule);
         closeBtn.addEventListener("click", handleNo);
       });
     }
@@ -308,6 +367,8 @@
       });
     }
 
+    // Note: Reschedule functionality is handled by reschedule-handler.js
+
     // Bookings rendering
     document.addEventListener("DOMContentLoaded", function() {
       // Initialize ProfileManager for real-time profile picture updates
@@ -362,18 +423,27 @@
               <p><strong>Status:</strong> <span class="${statusClass}">${statusText}</span></p>
               <p><strong>Payment Method:</strong> <span class="${paymentClass}">${paymentText}</span></p>
               <p><strong>Date Booked:</strong> ${appointmentDate}</p>
-              <button class="cancel-btn" data-id="${booking.id}">Cancel Booking</button>
+              <div class="booking-actions">
+                <button class="cancel-btn" data-id="${booking.id}">Cancel Booking</button>
+                <button class="reschedule-btn" data-id="${booking.id}"><i class="fas fa-calendar-alt"></i> Reschedule</button>
+              </div>
             `;
             container.appendChild(div);
           });
 
-          // Add event listeners for cancel buttons (UPDATED)
-          document.querySelectorAll('.cancel-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-              const confirmed = await showConfirmModal("Are you sure you want to cancel this booking?");
-              if (!confirmed) return;
-              
+          // Add event listeners for cancel and reschedule buttons
+          document.querySelectorAll('.reschedule-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
               const bookingId = this.getAttribute('data-id');
+              openRescheduleModal(bookingId);
+            });
+          });
+
+            document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+              const bookingId = this.getAttribute('data-id');
+              const confirmed = await showConfirmModal("Are you sure you want to cancel this booking?", bookingId);
+              if (!confirmed || confirmed === 'reschedule') return;
               try {
                 const res = await fetch('/api/cancel-booking', {
                   method: 'POST',

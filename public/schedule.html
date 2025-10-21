@@ -1224,6 +1224,33 @@
 
 
 
+      // Function to validate time range
+      function isTimeInRange(timeStr) {
+        // Convert time string to 24-hour format for comparison
+        const [time, period] = timeStr.split(' ');
+        let [hours, minutes] = time.split(':');
+        hours = parseInt(hours);
+        
+        // Convert to 24-hour format
+        if (period.toLowerCase() === 'pm' && hours !== 12) {
+          hours += 12;
+        } else if (period.toLowerCase() === 'am' && hours === 12) {
+          hours = 0;
+        }
+
+        // Create Date objects for comparison
+        const inputTime = new Date();
+        inputTime.setHours(hours, parseInt(minutes), 0);
+
+        const openTime = new Date();
+        openTime.setHours(10, 0, 0); // 10:00 AM
+
+        const closeTime = new Date();
+        closeTime.setHours(20, 0, 0); // 8:00 PM
+
+        return inputTime >= openTime && inputTime <= closeTime;
+      }
+
       // Add new timeslot
       async function addNewTimeslot() {
         const barberId = document.getElementById("timeslot-barber-select").value;
@@ -1244,6 +1271,12 @@
         const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i;
         if (!timeRegex.test(time)) {
           showModal("Invalid time format. Use format like '09:00 AM' or '02:30 PM'");
+          return;
+        }
+
+        // Validate time range
+        if (!isTimeInRange(time)) {
+          showModal("Time must be between 10:00 AM and 8:00 PM");
           return;
         }
 
@@ -1307,6 +1340,12 @@
         const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i;
         if (!timeRegex.test(newTime)) {
           showModal("Invalid time format. Use format like '09:00 AM' or '02:30 PM'");
+          return;
+        }
+
+        // Validate time range
+        if (!isTimeInRange(newTime)) {
+          showModal("Time must be between 10:00 AM and 8:00 PM");
           return;
         }
 
