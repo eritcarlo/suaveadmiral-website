@@ -369,12 +369,36 @@
       let selectedTimeId = null;
       let selectedDate = null;
 
-      // Set minimum date to today and default value
-      const today = new Date().toISOString().split("T")[0];
+      // Set minimum date to today and maximum date to 30 days from today
+      const today = new Date();
+      const thirtyDaysFromNow = new Date(today);
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+      const todayStr = today.toISOString().split("T")[0];
+      const maxDateStr = thirtyDaysFromNow.toISOString().split("T")[0];
+
       const bookingDateInput = document.getElementById("booking-date");
-      bookingDateInput.min = today;
-      bookingDateInput.value = today; // Set today as default
-      selectedDate = today; // Set selectedDate to today
+      bookingDateInput.min = todayStr;
+      bookingDateInput.max = maxDateStr;
+      bookingDateInput.value = todayStr; // Set today as default
+      selectedDate = todayStr; // Set selectedDate to today
+
+      // Add visual helper text for date range
+      const dateSelection = document.getElementById("date-selection");
+      const dateHelper = document.createElement("div");
+      dateHelper.style.cssText = "font-size: 0.85em; color: #666; margin-top: 5px; text-align: center;";
+      dateHelper.textContent = `You can book appointments from ${formatDate(todayStr)} to ${formatDate(maxDateStr)}`;
+      dateSelection.appendChild(dateHelper);
+
+      // Helper function to format date in a more readable way
+      function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
 
       function selectBarber(barberId, element) {
         selectedBarberId = barberId;
@@ -407,6 +431,17 @@
 
       // Date selection handler (FIXED)
       bookingDateInput.addEventListener("change", function () {
+        const selectedDateObj = new Date(this.value);
+        const maxDate = new Date(maxDateStr);
+
+        // Validate date is within allowed range
+        if (selectedDateObj < today || selectedDateObj > maxDate) {
+          showModal("Please select a date within the next 30 days");
+          this.value = todayStr;
+          selectedDate = todayStr;
+          return;
+        }
+
         selectedDate = this.value;
         selectedTimeId = null;
 

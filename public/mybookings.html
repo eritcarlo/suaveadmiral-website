@@ -207,6 +207,7 @@
 
   <script src="profile-manager.js"></script>
   <script src="reschedule-handler.js"></script>
+  <script src="final-confirm-modal.js"></script>
   <script>
     // Modal functions
     function showModal(message) {
@@ -432,8 +433,14 @@
             document.querySelectorAll('.cancel-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
               const bookingId = this.getAttribute('data-id');
-              const confirmed = await showConfirmModal("Are you sure you want to cancel this booking?", bookingId);
-              if (!confirmed || confirmed === 'reschedule') return;
+              // First confirmation
+              const firstConfirmed = await showConfirmModal("Are you sure you want to cancel this booking?", bookingId);
+              if (!firstConfirmed || firstConfirmed === 'reschedule') return;
+              
+              // Final confirmation
+              const finalConfirmed = await showFinalConfirmModal();
+              if (!finalConfirmed) return;
+
               try {
                 const res = await fetch('/api/cancel-booking', {
                   method: 'POST',

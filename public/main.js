@@ -181,9 +181,27 @@ class FormManager {
       this.handleLogin(e);
     });
 
+    // Login email validation with debounce
+    let loginEmailTimeout;
+    document.getElementById('loginEmail').addEventListener('input', (e) => {
+      clearTimeout(loginEmailTimeout);
+      loginEmailTimeout = setTimeout(() => {
+        this.validateEmailRealTime(e.target, 'login');
+      }, 300); // Wait 300ms after user stops typing
+    });
+
     // Signup form
     document.getElementById('signupForm').addEventListener('submit', (e) => {
       this.handleSignup(e);
+    });
+
+    // Signup email validation with debounce
+    let signupEmailTimeout;
+    document.getElementById('signupEmail').addEventListener('input', (e) => {
+      clearTimeout(signupEmailTimeout);
+      signupEmailTimeout = setTimeout(() => {
+        this.validateEmailRealTime(e.target, 'signup');
+      }, 300); // Wait 300ms after user stops typing
     });
 
     // Terms checkbox
@@ -325,12 +343,25 @@ class FormManager {
     
     const submitBtn = document.getElementById('loginSubmit');
     const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Logging in...';
-
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     const rememberMe = document.getElementById('rememberMe').checked;
+
+    // Email validation
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      this.showLoginError(emailValidation.error);
+      return;
+    }
+
+    // Additional email format validation
+    if (email.endsWith('.com.com') || email.split('@').length > 2 || email.includes('..')) {
+      this.showLoginError('Please enter a valid email address');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Logging in...';
 
     try {
       const response = await fetch('/api/login', {
@@ -386,6 +417,19 @@ class FormManager {
     // Validation
     if (!fullName) {
       this.modalManager.showSuccess('❌ Full name is required!');
+      return;
+    }
+
+    // Email validation
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      this.modalManager.showSuccess('❌ ' + emailValidation.error);
+      return;
+    }
+
+    // Additional email format validation
+    if (email.endsWith('.com.com') || email.split('@').length > 2 || email.includes('..')) {
+      this.modalManager.showSuccess('❌ Please enter a valid email address');
       return;
     }
 
@@ -754,6 +798,54 @@ class FormManager {
         errorDiv.remove();
       }
     }, 5000);
+  }
+
+  validateEmailRealTime(emailInput, formType) {
+    // Remove all existing error messages in the form
+    const form = emailInput.closest('form');
+    const existingErrors = form.querySelectorAll('.email-error');
+    existingErrors.forEach(error => error.remove());
+
+    const email = emailInput.value.trim();
+    if (email.length === 0) return; // Don't validate empty input
+
+    const validation = validateEmail(email);
+    
+    // Check for common invalid patterns
+    if (email.endsWith('.com.com') || email.split('@').length > 2 || email.includes('..')) {
+      validation.isValid = false;
+      validation.error = 'Please enter a valid email address';
+    }
+
+    if (!validation.isValid) {
+      // Create single error element
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'email-error';
+      errorDiv.innerHTML = `
+        <div style="
+          background: rgba(207, 12, 2, 0.1);
+          border: 1px solid #cf0c02;
+          border-radius: 8px;
+          padding: 8px 12px;
+          margin: 8px 0;
+          color: #cf0c02;
+          font-size: 13px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        ">
+          <i class="fas fa-times-circle"></i> ${validation.error}
+        </div>
+      `;
+      
+      // Insert only one error message after the email input
+      const existingError = emailInput.parentElement.nextElementSibling;
+      if (existingError?.classList.contains('email-error')) {
+        existingError.replaceWith(errorDiv);
+      } else {
+        emailInput.parentElement.insertAdjacentElement('afterend', errorDiv);
+      }
+    }
   }
 }
 

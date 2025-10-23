@@ -592,6 +592,8 @@ async function sendBookingConfirmation(email, bookingDetails) {
     const result = await sendEmail(email, subject, html);
     if (result.success) {
       console.log("✅ Booking confirmation email sent successfully");
+      // Schedule reminder emails every 3 hours until appointment time
+      scheduleAppointmentReminders(email, bookingDetails);
     } else {
       console.error("❌ Failed to send booking confirmation email:", result.error);
     }
@@ -599,6 +601,68 @@ async function sendBookingConfirmation(email, bookingDetails) {
   } catch (error) {
     console.error("❌ Booking confirmation email error:", error);
     return { success: false, error: error.message };
+  }
+}
+
+// Reminder email function
+async function sendAppointmentReminder(email, bookingDetails) {
+  try {
+    const subject = "Appointment Reminder - Suave Barbershop";
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #cf0c02;">Appointment Reminder</h2>
+        <p>Dear Valued Customer,</p>
+        <p>This is a friendly reminder for your upcoming appointment at Suave Barbershop.</p>
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin: 10px 0;"><strong>Date:</strong> ${bookingDetails.booking_date}</li>
+            <li style="margin: 10px 0;"><strong>Time:</strong> ${bookingDetails.time}</li>
+            <li style="margin: 10px 0;"><strong>Service:</strong> ${bookingDetails.service}</li>
+            <li style="margin: 10px 0;"><strong>Barber:</strong> ${bookingDetails.barber}</li>
+          </ul>
+        </div>
+        <p>Please arrive 10 minutes before your scheduled time.</p>
+        <p>We look forward to seeing you!</p>
+        <p>Best regards,<br><strong>Suave Barbershop Team</strong></p>
+      </div>
+    `;
+    const result = await sendEmail(email, subject, html);
+    if (result.success) {
+      console.log("✅ Appointment reminder email sent successfully");
+    } else {
+      console.error("❌ Failed to send appointment reminder email:", result.error);
+    }
+    return result;
+  } catch (error) {
+    console.error("❌ Appointment reminder email error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Scheduler for reminder emails
+function scheduleAppointmentReminders(email, bookingDetails) {
+  // Parse appointment time
+  const appointmentDateTime = new Date(`${bookingDetails.booking_date}T${bookingDetails.time}`);
+  const now = new Date();
+  if (isNaN(appointmentDateTime.getTime())) {
+    console.error("❌ Invalid appointment date/time for reminders");
+    return;
+  }
+  // Calculate time until appointment
+  let nextReminder = new Date(now.getTime() + 3 * 60 * 60 * 1000); // 3 hours from now
+  // Keep sending reminders every 3 hours until 1 hour before appointment
+  function sendNextReminder() {
+    const timeLeft = appointmentDateTime - new Date();
+    if (timeLeft > 60 * 60 * 1000) { // More than 1 hour left
+      sendAppointmentReminder(email, bookingDetails);
+      nextReminder = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
+      const delay = nextReminder - new Date();
+      setTimeout(sendNextReminder, delay);
+    }
+  }
+  // Initial reminder (if enough time before appointment)
+  if (appointmentDateTime - now > 60 * 60 * 1000) {
+    setTimeout(sendNextReminder, nextReminder - now);
   }
 }
 
