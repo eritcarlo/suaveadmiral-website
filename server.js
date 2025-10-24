@@ -641,11 +641,44 @@ async function sendAppointmentReminder(email, bookingDetails) {
 
 // Scheduler for reminder emails
 function scheduleAppointmentReminders(email, bookingDetails) {
-  // Parse appointment time
-  const appointmentDateTime = new Date(`${bookingDetails.booking_date}T${bookingDetails.time}`);
+  // Robustly parse appointment date and time (handles `HH:MM`, `H:MM AM/PM`, etc.)
+  function parseBookingDateTime(dateStr, timeStr) {
+    if (!dateStr || !timeStr) return null;
+
+    // Try direct ISO parse first (works if timeStr is like '09:00' or '09:00:00')
+    let iso = `${dateStr}T${timeStr}`;
+    let d = new Date(iso);
+    if (!isNaN(d.getTime())) return d;
+
+    // Normalize time (e.g., '10:00 AM' -> '10:00 AM')
+    const m = ('' + timeStr).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+    if (!m) return null;
+
+    let hour = parseInt(m[1], 10);
+    const minute = m[2] ? parseInt(m[2], 10) : 0;
+    const ampm = m[3] ? m[3].toUpperCase() : null;
+
+    if (ampm) {
+      if (ampm === 'PM' && hour < 12) hour += 12;
+      if (ampm === 'AM' && hour === 12) hour = 0;
+    }
+
+    // Build ISO string
+    const hh = String(hour).padStart(2, '0');
+    const mm = String(minute).padStart(2, '0');
+    const iso2 = `${dateStr}T${hh}:${mm}:00`;
+    const d2 = new Date(iso2);
+    if (!isNaN(d2.getTime())) return d2;
+    return null;
+  }
+
+  const appointmentDateTime = parseBookingDateTime(bookingDetails.booking_date, bookingDetails.time);
   const now = new Date();
   if (isNaN(appointmentDateTime.getTime())) {
-    console.error("❌ Invalid appointment date/time for reminders");
+    console.error("❌ Invalid appointment date/time for reminders", {
+      booking_date: bookingDetails.booking_date,
+      time: bookingDetails.time,
+    });
     return;
   }
   // Calculate time until appointment
