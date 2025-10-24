@@ -649,17 +649,20 @@ function scheduleAppointmentReminders(email, bookingDetails) {
     return;
   }
   // Calculate time until appointment
-  let nextReminder = new Date(now.getTime() + 3 * 60 * 60 * 1000); // 3 hours from now
-  // Keep sending reminders every 3 hours until 1 hour before appointment
+  // For testing we send reminders every 10 minutes (10 * 60 * 1000 ms)
+  const REMINDER_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes for testing
+  let nextReminder = new Date(now.getTime() + REMINDER_INTERVAL_MS);
+
+  // Keep sending reminders every REMINDER_INTERVAL_MS until 1 hour before appointment
   function sendNextReminder() {
     const timeLeft = appointmentDateTime - new Date();
     if (timeLeft > 60 * 60 * 1000) { // More than 1 hour left
       sendAppointmentReminder(email, bookingDetails);
-      nextReminder = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
-      const delay = nextReminder - new Date();
+      const delay = REMINDER_INTERVAL_MS;
       setTimeout(sendNextReminder, delay);
     }
   }
+
   // Initial reminder (if enough time before appointment)
   if (appointmentDateTime - now > 60 * 60 * 1000) {
     setTimeout(sendNextReminder, nextReminder - now);
@@ -2317,6 +2320,7 @@ app.post(
             if (booking.email) {
               sendBookingConfirmation(booking.email, {
                 time: booking.time,
+                booking_date: booking.booking_date,
                 service: booking.service,
                 payment_method: booking.payment_method,
                 barber: booking.barber_name,
