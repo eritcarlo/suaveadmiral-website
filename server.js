@@ -682,8 +682,8 @@ function scheduleAppointmentReminders(email, bookingDetails) {
     return;
   }
   // Calculate time until appointment
-  // For testing we send reminders every 10 minutes (10 * 60 * 1000 ms)
-  const REMINDER_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes for testing
+  // Reminder interval: 1 hour (60 * 60 * 1000 ms)
+  const REMINDER_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
   let nextReminder = new Date(now.getTime() + REMINDER_INTERVAL_MS);
 
   // Keep sending reminders every REMINDER_INTERVAL_MS until 1 hour before appointment
