@@ -44,5 +44,19 @@ function validateEmail(email) {
         return { isValid: false, error: "Email address is too long" };
     }
 
+    // Extra safeguard: reject suspicious provider + extra-TLD patterns like "gmail.com.us"
+    // Common providers that shouldn't appear as a third-level domain followed by 'com' (e.g. gmail.com.us)
+    const suspiciousProviders = ['gmail', 'yahoo', 'hotmail', 'outlook', 'live', 'icloud', 'aol', 'protonmail', 'gmx', 'mail'];
+    const lowerDomain = domain.toLowerCase();
+    const parts = lowerDomain.split('.');
+    if (parts.length >= 3) {
+        const thirdLevel = parts[parts.length - 3];
+        const secondLevel = parts[parts.length - 2];
+        // If pattern is provider.com.X (e.g. gmail.com.us), reject it as likely abuse/mistyped
+        if (suspiciousProviders.includes(thirdLevel) && secondLevel === 'com') {
+            return { isValid: false, error: "Invalid or suspicious email domain" };
+        }
+    }
+
     return { isValid: true };
 }
